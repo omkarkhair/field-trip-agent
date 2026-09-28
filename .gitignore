@@ -1,0 +1,22 @@
+AGENTS.md
+
+# dependencies & build output
+node_modules/
+dist/
+
+# Cloudflare / Wrangler local state
+.wrangler/
+.flue-vite.wrangler.jsonc
+
+# Flue local cache
+.flue/
+
+# secrets — never commit
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.log

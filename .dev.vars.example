@@ -1,0 +1,5 @@
+# Local Worker variables for `npm run dev`. Copy to .dev.vars if you need any.
+#
+# This workshop uses Workers AI through the AI binding, so NO model API keys
+# are required. If you switch to another provider, add its key here, e.g.:
+# ANTHROPIC_API_KEY="sk-ant-..."

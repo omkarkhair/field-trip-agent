@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "field-trip-agent",
+
+  // Flue requires nodejs_compat and a compatibility_date of 2026-04-01 or newer.
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Workers AI binding: powers `cloudflare/@cf/...` models. No API keys needed.
+  // AI always runs remotely (even in `vite dev`), so `remote: true` is explicit.
+  "ai": {
+    "binding": "AI",
+    "remote": true
+  },
+
+  // Durable Object migrations. Flue generates one DO class per agent
+  // (FieldTrip -> FlueFieldTripAgent), but YOU own the migration history.
+  // Checkpoint 1 adds the first entry here. Append; never rewrite deployed entries.
+  "migrations": []
+}
