@@ -1,0 +1,19 @@
+.agents/skills/build-field-trip-agent/references/deploy.md
+  s_2c7aaccb31ed20::t_0c59ac891e78d8 1-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5bc8459f3a1f67a97b88cbb8ba15b78e4ae24763",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}
