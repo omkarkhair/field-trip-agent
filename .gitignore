@@ -6,6 +6,7 @@ dist/
 
 # Cloudflare / Wrangler local state
 .wrangler/
+.flue-vite/
 .flue-vite.wrangler.jsonc
 
 # Flue local cache
