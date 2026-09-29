@@ -346,7 +346,12 @@
       if (m.settlement) return `<div class="notice">Submission ${esc(m.settlement.outcome)}. ${esc(text)}</div>`;
       return text.trim() ? `<div class="signal">[${esc(m.purpose || 'system')}] ${esc(text.trim())}</div>` : '';
     }
-    const parts = (m.parts || []).map((p, i) => renderPart(p, m.id, i, busy)).join('');
+    // data-<name> parts: show only the latest write per name (writes update one part).
+    const lastData = new Map();
+    (m.parts || []).forEach((p, i) => { if (p.type && p.type.startsWith('data-')) lastData.set(p.type, i); });
+    const parts = (m.parts || [])
+      .map((p, i) => (p.type && p.type.startsWith('data-') && lastData.get(p.type) !== i ? '' : renderPart(p, m.id, i, busy)))
+      .join('');
     return `<div class="msg agent"><div class="who">fieldtrip</div>${parts || '<div class="thinking"><span class="spinner"></span>working…</div>'}</div>`;
   }
 
