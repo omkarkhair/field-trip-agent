@@ -1,0 +1,35 @@
+.agents/skills/build-field-trip-agent/references/checkpoints.md
+  s_2c7aaccb31ed20::t_8838604d67b622 1,3-4,6-11,13,15-36
+.agents/skills/build-field-trip-agent/references/checkpoints/cp0-prework.md
+  s_2c7aaccb31ed20::t_b2ed09b46445df 1-12
+.agents/skills/build-field-trip-agent/references/checkpoints/cp1-hello-agent.md
+  s_2c7aaccb31ed20::t_044a3dc0996de2 1-10
+.agents/skills/build-field-trip-agent/references/checkpoints/cp2-hooks-state.md
+  s_2c7aaccb31ed20::t_f949d972ef8861 1-9
+.agents/skills/build-field-trip-agent/references/checkpoints/cp3-api-tools.md
+  s_2c7aaccb31ed20::t_dffdd869247149 1-9
+.agents/skills/build-field-trip-agent/references/checkpoints/cp4-subagent.md
+  s_2c7aaccb31ed20::t_545665893ad330 1-11
+.agents/skills/build-field-trip-agent/references/checkpoints/cp5-sandbox.md
+  s_2c7aaccb31ed20::t_04eaedbae69dee 1-11
+.agents/skills/build-field-trip-agent/references/checkpoints/cp6-iterate-observe.md
+  s_2c7aaccb31ed20::t_c5ceb735794d2b 1-8
+.agents/skills/build-field-trip-agent/references/checkpoints/cp7-durability.md
+  s_2c7aaccb31ed20::t_d0c7238e83443d 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "ce169a72b01e6240ab413d452d52ea001526f1cb",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}
