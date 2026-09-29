@@ -19,6 +19,8 @@
    the conversation history.
 4. **`useModel` is the one required hook,** called exactly once per render.
    `cloudflare/...` runs on Workers AI through the `AI` binding, so no API key is needed.
+   The workshop model, `llama-4-scout`, runs on the free plan (paid alternatives
+   are listed in [flue-cheatsheet.md](../flue-cheatsheet.md#model-choice-tested-with-this-projects-cp2-tool-call)).
 5. **Adding an agent is a triple:**
    - the `'use agent'` file
    - the `app.route(...)` mount
@@ -59,7 +61,7 @@
 import { useModel } from '@flue/runtime';
 
 export function FieldTrip() {
-  useModel('cloudflare/@cf/moonshotai/kimi-k2.6');
+  useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct');
   return `You are FieldTrip, a helpful team-offsite planner. You help groups plan memorable offsites by understanding their destination, dates, headcount, budget, and interests.`;
 }
 ```
@@ -140,24 +142,22 @@ portable.
    ```
    Pass: exit 0, same kind of reply from the live URL.
 
-### Sample passing output (reference build)
+### Sample passing output (reference build, live)
 
 ```
-POST http://localhost:5173/agents/field-trip/cp1-local
-202 accepted · submission sub_01M3NWX9… · waiting for the reply…
+POST https://field-trip-agent.omkk.workers.dev/agents/field-trip/cp1-scout
+202 accepted · submission sub_01M3P1… · waiting for the reply…
 
-you › Hi, who are you?
+you › Hi, who are you? Two sentences.
 
 agent ›
-Hi! I'm **FieldTrip**, your team-offsite planning assistant. …
-- **Destination** … **Dates** … **Headcount** … **Budget** … **Interests** …
-**What kind of offsite are you thinking about?**
+I'm FieldTrip, a helpful team-offsite planner. I assist groups in planning
+memorable offsites by understanding their destination, dates, headcount, budget, and interests.
 
-✔ completed in 10.6s
+✔ completed in 3.2s
 ```
 
-Reference timings: about 5–11 s per reply locally and live. Deploy upload is
-about 807 KiB gzipped.
+Reference timings: about 1.5–3 s per reply. Deploy upload is about 807 KiB gzipped.
 
 ## What to tell the attendee
 

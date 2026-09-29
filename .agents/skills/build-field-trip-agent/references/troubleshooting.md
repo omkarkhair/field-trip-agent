@@ -58,6 +58,43 @@ prompt) instead. Never commit an account id to the workshop repo.
 **Deploy upload grew from ~573 KiB to ~807 KiB gzipped at cp1**
 → Expected: the Flue agent runtime and the Durable Object class are now bundled.
 
+**Agent behaves like an older version / ignores new tools, even after edits**
+→ Seen while building: **another project's dev server was already on port
+5173**. Vite's new server failed to bind, and every smoke test silently hit the
+*other* project's agent (which had no `save_trip_brief`). We wrongly blamed the
+model for an hour.
+→ `npm run dev` now uses `--strictPort`, so a busy port fails with
+`Port 5173 is already in use` instead of drifting. Stop the other server, or run
+`npm run dev -- --port 5180` and point smoke at `http://localhost:5180`.
+→ Quick diagnosis: ask the agent *"List the exact names of the tools you can
+call."* If a tool you added is missing, you're talking to the wrong server or
+old code.
+
+## cp2
+
+**Model never calls `save_trip_brief`**
+→ First rule out the wrong-server problem above (the tool list check).
+→ Then check the model. `llama-4-scout` (default), `kimi-k2.6` and
+`glm-5.3` (with `thinkingLevel: 'low'`) all call it reliably. Keep the
+"FIRST action is to call `save_trip_brief`" rule at the top of the instructions.
+
+**`Submission failed … AiError … 5006 … Type mismatch of '/messages/0/content', 'array' not in 'string'`**
+→ The model can't accept Flue's structured message content after a tool call.
+Seen with `@cf/meta/llama-3.3-70b-instruct-fp8-fast`.
+→ Switch to `@cf/meta/llama-4-scout-17b-16e-instruct`.
+
+**Workers AI error mentioning a paid plan / `require_workers_paid`**
+→ `kimi-k2.6`, `glm-5.x`, `deepseek-v4-*` need Workers Paid. Use the default
+`llama-4-scout`, which runs on the free plan.
+
+**`glm-5.3` is very slow even with `thinkingLevel: 'off'`**
+→ Its reasoning is mandatory. `'off'`/`'minimal'`/`'medium'` normalize to
+`'max'`. Use `thinkingLevel: 'low'`.
+
+**`[advisory] System instructions updated.` in smoke output**
+→ Expected. The tool wrote state and the agent re-rendered its instructions.
+That line is the hook model made visible.
+
 ## Known in advance (from the Flue docs)
 
 **Build error mentioning migrations / DO class not found on deploy**

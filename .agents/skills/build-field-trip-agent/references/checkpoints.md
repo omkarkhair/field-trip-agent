@@ -31,6 +31,6 @@ for the checkpoint you are implementing.** Each file has:
   code differs, reconcile it with `git diff cpN -- src/ wrangler.jsonc package.json`.
 - **Conversation ids** in verify commands are arbitrary. Use a fresh id when a
   checkpoint changes agent behaviour, so old history doesn't confuse the test.
-- **Model:** `cloudflare/@cf/moonshotai/kimi-k2.6` (Workers AI, no API key).
+- **Model:** `cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct` (Workers AI, no API key).
 - **Model output varies.** Verify passes when the *structure* matches (exit 0,
   expected tool calls appear). The exact wording will differ from the samples.

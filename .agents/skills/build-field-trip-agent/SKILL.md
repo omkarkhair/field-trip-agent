@@ -117,7 +117,7 @@ If they want to keep their own edits, compare them with
 3. **Every exported capitalized function in a `'use agent'` module becomes an
    agent** (and needs a migration). Subagent functions are never exported from
    there. They live in `src/subagents/*.ts` via `defineSubagent`.
-4. `useModel('cloudflare/@cf/moonshotai/kimi-k2.6')` is called exactly once per
+4. `useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct')` is called exactly once per
    render in the parent. Subagents can't call `useModel`, `useSandbox`, or
    `usePersistentState`.
 5. Tools: valibot `input` schema, return `{ output }` or a string, **throw** on

@@ -6,7 +6,7 @@ Everything here should be done **before** the session. The starter on `main`
 ## Steps
 
 1. **Node.js ≥ 22.19**: `node --version`
-2. **Cloudflare account** (free plan works) with a `workers.dev` subdomain.
+2. **Cloudflare account** (the free plan works: the default model `llama-4-scout` runs on it) with a `workers.dev` subdomain.
    First-time users: open **Workers & Pages** in <https://dash.cloudflare.com>
    once so the subdomain gets created.
 3. **Clone + install**

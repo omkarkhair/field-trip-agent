@@ -34,7 +34,7 @@ import { Bash, InMemoryFs } from 'just-bash';
 import { type AgentProps, useModel } from '@flue/runtime';
 
 export function FieldTrip({ id }: AgentProps) {
-  useModel('cloudflare/@cf/moonshotai/kimi-k2.6'); // required, exactly once per render
+  useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct'); // required, exactly once per render
   return `You plan team offsites. Conversation: ${id}`; // = system prompt
 }
 ```
@@ -247,7 +247,21 @@ Defaults: 10 attempts, 1 h per submission.
 
 ## Workers AI model
 
-`useModel('cloudflare/@cf/moonshotai/kimi-k2.6')` goes through the `AI` binding,
+`useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct')` goes through the `AI` binding,
 which routes via AI Gateway by default and needs no API key. Requires
 `flue({ providers: ['cloudflare'] })` (or no `providers` list) and the `ai`
 binding in `wrangler.jsonc`. Not available under `flue run`.
+
+### Model choice (tested with this project's cp2 tool call)
+
+| Model | Plan | Result |
+|---|---|---|
+| `@cf/meta/llama-4-scout-17b-16e-instruct` | **free** | ✔ **workshop default**. Reliable tool calls, ~1.5–5 s per reply |
+| `@cf/moonshotai/kimi-k2.6` | Workers Paid | ✔ works with defaults, ~13 s per reply |
+| `@cf/zai-org/glm-5.3` | Workers Paid | ✔ with `useModel(…, { thinkingLevel: 'low' })`. Reasoning is mandatory; any other level (incl. `'off'`) normalizes to `'max'` (slow). ~12 s |
+| `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | free | ✘ **incompatible**: after the first tool call Workers AI rejects the request (`400 … '/messages/0/content', 'array' not in 'string'`). Don't use |
+
+List catalog models and their flags with
+`npx wrangler ai models list --json` (look for `function_calling: true`
+and `require_workers_paid`). Only models with function calling can use tools.
+Switching models is a one-line change in the agent; no deploy config changes.

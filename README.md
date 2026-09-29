@@ -33,7 +33,7 @@ through a durable tool that survives a redeploy.
 Please do this **before** you arrive — conference Wi-Fi is not your friend.
 
 1. **Install Node.js 22.19 or newer** — `node --version`
-2. **Have a Cloudflare account** (free plan is fine) with a `workers.dev`
+2. **Have a Cloudflare account** (free plan is fine; the workshop model runs on it) with a `workers.dev`
    subdomain. If you've never deployed a Worker, open
    **Workers & Pages** in the [dashboard](https://dash.cloudflare.com) once so the
    subdomain gets created.
@@ -177,6 +177,7 @@ scripts/                        # check.mjs, smoke.mjs (plain Node — works on 
 | Symptom | Fix |
 |---|---|
 | `npm run check` says not logged in | `npx wrangler login`, then re-run the check |
+| `Port 5173 is already in use` | Another dev server (maybe another project) is running. Stop it, or `npm run dev -- --port 5180` and smoke against `http://localhost:5180` |
 | Dev server: "Cloudflare plugin is not receiving Flue's Worker configuration" | `vite.config.ts` must use `cloudflare({ config: flueWorkerConfig() })` |
 | Deploy fails asking for a `workers.dev` subdomain | Open **Workers & Pages** in the dashboard once to create it |
 | Deploy fails with a Durable Object / migration error | Every agent needs a `new_sqlite_classes` migration in `wrangler.jsonc` — see cp1 |
@@ -233,7 +234,7 @@ hand-writing several checkpoints at once.
 5. `useModel` is required and called **exactly once** per render. Sub-agents
    cannot call `useModel`, `useSandbox`, or `usePersistentState` — set `model` on
    the sub-agent definition instead.
-6. Use the Workers AI model `cloudflare/@cf/moonshotai/kimi-k2.6` — no API keys.
+6. Use the Workers AI model `cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct` — no API keys.
    `cloudflare/...` models only work under `vite dev` or when deployed, not `flue run`.
 7. Reserved tool names: `task`, `activate_skill`, `read_skill_resource`, `read`,
    `write`, `edit`, `bash`, `grep`, `glob`.
