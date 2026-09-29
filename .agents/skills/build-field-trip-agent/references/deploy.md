@@ -9,7 +9,8 @@ npm run deploy                                                  # vite build && 
 npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev <id> "<message>"   # test live
 ```
 
-- `npm run deploy` prints the live URL. The Worker name comes from
+- `npm run deploy` prints the live URL. The chat UI is at its root
+  (`https://field-trip-agent.<subdomain>.workers.dev/`). The Worker name comes from
   `wrangler.jsonc` → `field-trip-agent`.
 - `vite build` writes `dist/field_trip_agent/` (code + finalized `wrangler.json`).
   `wrangler deploy` reads it automatically via the Cloudflare plugin's redirect.

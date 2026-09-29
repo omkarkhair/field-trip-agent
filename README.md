@@ -58,6 +58,8 @@ Please do this **before** you arrive — conference Wi-Fi is not your friend.
    # in another terminal
    curl http://localhost:5173/api/ping      # → pong
    ```
+7. **Open the chat UI** at <http://localhost:5173>. Until checkpoint 1 it tells
+   you no agent is mounted yet. That's expected.
 
 **No model API keys are needed.** The agent uses
 [Workers AI](https://developers.cloudflare.com/workers-ai/) through the Worker's
@@ -130,6 +132,13 @@ to checkpoint 3"* — the skill knows how.
 
 ### Talking to your agent
 
+**In the browser:** open <http://localhost:5173> (or your `workers.dev` URL). The
+chat UI streams replies live, shows every tool call as an expandable chip, and
+has example prompts for each checkpoint. **New conversation** starts a fresh
+Durable Object.
+
+**From the terminal:**
+
 Every conversation lives at `/agents/field-trip/<id>`. The `<id>` is anything you
 choose — use the same id to continue a conversation.
 
@@ -156,7 +165,8 @@ What the repo looks like by the final checkpoint:
 
 ```
 src/
-├── app.ts                      # Hono app: mounts /agents/field-trip, /api/ping
+├── app.ts                      # Hono app: chat UI at /, /agents/field-trip, /api/ping
+├── ui/index.html               # browser chat UI (given; no build step)
 ├── agents/field-trip.ts        # 'use agent' — the FieldTrip agent
 ├── subagents/venue-scout.ts    # sub-agent (not a registered agent)
 ├── tools/
@@ -248,3 +258,5 @@ hand-writing several checkpoints at once.
 11. Never commit `.dev.vars`, `.env`, or secrets.
 12. Stay within the attendee's current checkpoint; don't pull later checkpoints'
     code forward.
+13. `src/ui/index.html` is given scaffolding. Don't edit it unless the attendee
+    asks. It already renders tool calls and any `data-<name>` parts.

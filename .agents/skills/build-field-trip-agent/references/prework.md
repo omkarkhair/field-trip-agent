@@ -23,6 +23,8 @@ Everything here should be done **before** the session. The starter on `main`
    npm run dev                              # terminal 1
    curl http://localhost:5173/api/ping      # terminal 2 → pong
    ```
+7. **Open the chat UI**: <http://localhost:5173>. At cp0, sending a message
+   shows *"No agent is mounted … That's checkpoint 1"*. That's expected.
 
 ## What `npm run check` verifies
 
@@ -45,7 +47,9 @@ Exit code 0 means ready.
 | `package.json` | pinned versions; scripts `dev`, `build`, `deploy`, `check`, `smoke`, `typecheck` |
 | `vite.config.ts` | `flue({ providers: ['cloudflare'] })` then `cloudflare({ config: flueWorkerConfig() })` |
 | `wrangler.jsonc` | name `field-trip-agent`, `nodejs_compat`, compat date ≥ 2026-04-01, `ai` binding (`remote: true`), **empty** `migrations: []` |
-| `src/app.ts` | Hono app, `GET /api/ping` → `pong`; agents get mounted here from cp1 |
+| `src/app.ts` | Hono app: `GET /` → chat UI, `GET /api/ping` → `pong`; agents get mounted here from cp1 |
+| `src/ui/index.html` | browser chat UI (plain HTML/JS, no build step). Streams replies over SSE, falls back to polling, shows tool calls. **Scaffolding: attendees don't edit it** |
+| `src/env.d.ts` | types for the `?raw` HTML import |
 | `src/agents/` | empty (`.gitkeep`); cp1 adds `field-trip.ts` |
 | `scripts/check.mjs` | this pre-work check |
 | `scripts/smoke.mjs` | send a message and print the reply; the verify step for every checkpoint |

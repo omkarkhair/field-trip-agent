@@ -35,6 +35,23 @@ without that export.
 → Fixed in `scripts/check.mjs` (reads `node_modules/<pkg>/package.json`
 directly). Pull the latest `main` if you see this.
 
+**Chat UI (`http://localhost:5173`) says "No agent is mounted … checkpoint 1"**
+→ Expected at cp0. POST to `/agents/field-trip/:id` returns 404 until cp1
+mounts the agent.
+
+**Chat UI connection panel says "polling history" instead of "streaming (SSE)"**
+→ The live stream failed (a proxy or extension blocking `text/event-stream`,
+or a dropped connection), and the UI fell back to polling the snapshot every
+1.5 s. Replies still arrive, just all at once. No action needed.
+
+**Chat UI shows an old conversation / you want a clean slate**
+→ Click **New conversation**. The id is kept in `localStorage`
+(`fieldtrip.conversationId`) and is independent of the ids you use with `npm run smoke`.
+
+**Fonts look plain in the UI**
+→ Space Grotesk / JetBrains Mono load from Google Fonts. Offline, the UI falls
+back to system fonts. Harmless.
+
 **`npm run smoke` → `Expected 202, got 404` at cp0**
 → Expected: no agent is mounted until cp1.
 

@@ -149,6 +149,33 @@ Your trip details are: 16 people, Lisbon, with a budget of 400 EUR per person.
 ✔ completed in 1.5s
 ```
 
+## Bonus (optional): show the brief live in the chat UI
+
+The chat UI's side panel offers this prompt to attendees who finish early:
+
+> Implement the cp2 bonus: add a useDataWriter('brief') channel to the FieldTrip
+> agent and write the merged brief every time save_trip_brief runs.
+
+**This bonus is not part of the checkpoint code** and isn't in any tag. Only do
+it when the attendee asks, and don't carry it into later checkpoints unless they
+want to keep it. Guidance for the implementation:
+
+- `useDataWriter('brief')` returns a write function. Declare it
+  **unconditionally** in the agent body, identical on every render. A changing
+  set of data writers between renders throws.
+- Call the writer **inside the tool's `run`**, never during render (it throws there).
+- Write the *merged* brief: compute `const next = { ...brief, ...updates }`,
+  then `setBrief(next)` and `writeBrief(next)`.
+- An optional valibot schema can validate writes: `useDataWriter('brief', { schema })`.
+- The model never sees data parts. They are one-way, client-facing output.
+- The UI needs no change: it renders any `data-<name>` part as a card, keeping
+  the latest write per name. Verify in the browser by sending a brief and
+  seeing a `◆ data-brief` card with the JSON. With `npm run smoke`, data parts
+  print as `[data-brief] {…}`.
+- Concept to highlight: **state** (`usePersistentState`) is what the agent
+  remembers, and a **data writer** is how the agent shows structured data to
+  your UI.
+
 ## What to tell the attendee
 
 "Your agent function ran again before every model call. That's the hook model.
