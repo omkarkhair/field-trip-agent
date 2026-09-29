@@ -1,0 +1,23 @@
+src/agents/field-trip.ts
+  s_2c7aaccb31ed20::t_82bfe25deeb5b0 1-8
+src/app.ts
+  s_2c7aaccb31ed20::t_51439af58a731b 2-3,14
+wrangler.jsonc
+  s_2c7aaccb31ed20::t_d3391f45f1447d 19-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "6d791b060db31dda988782768a0cc59f13bba5a9",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}
