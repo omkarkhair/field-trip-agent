@@ -15,7 +15,10 @@ npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev <id> "<message
   `wrangler deploy` reads it automatically via the Cloudflare plugin's redirect.
   Always deploy from the project root and **never** pass `--config`.
 - Validate without deploying: `npx vite build && npx wrangler deploy --dry-run`.
-  At cp0 the upload is about 573 KiB gzipped.
+  The upload is about 573 KiB gzipped at cp0 and about 807 KiB from cp1 on.
+- Deploy output should list both bindings:
+  `env.FLUE_FIELD_TRIP_AGENT (FlueFieldTripAgent)  Durable Object` and `env.AI`.
+- Don't put `account_id` in `wrangler.jsonc`; use `CLOUDFLARE_ACCOUNT_ID` if needed.
 - Local and live conversations are separate: local DOs live in `.wrangler/state`,
   live DOs in your account.
 

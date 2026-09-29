@@ -42,6 +42,22 @@ directly). Pull the latest `main` if you see this.
 → Start `npm run dev` (port 5173) in another terminal. If 5173 is taken, Vite
 picks another port, so use the URL it prints.
 
+## cp1
+
+**`vite build` / `npm run deploy` warning: `[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use agent" … may not be preserved when bundling`**
+→ Harmless. Flue reads `'use agent'` at scan time, before bundling, and the
+deploy output lists `env.FLUE_FIELD_TRIP_AGENT (FlueFieldTripAgent)`, which proves
+it worked. Ignore it.
+
+**A coding agent added `"account_id": "…"` to `wrangler.jsonc`**
+→ This happened on a test run when wrangler asked for an account. It makes the
+config deploy to that one account only.
+→ Remove it and use `export CLOUDFLARE_ACCOUNT_ID=<id>` (or answer wrangler's
+prompt) instead. Never commit an account id to the workshop repo.
+
+**Deploy upload grew from ~573 KiB to ~807 KiB gzipped at cp1**
+→ Expected: the Flue agent runtime and the Durable Object class are now bundled.
+
 ## Known in advance (from the Flue docs)
 
 **Build error mentioning migrations / DO class not found on deploy**
