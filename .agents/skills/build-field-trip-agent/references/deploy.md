@@ -91,7 +91,7 @@ Not needed for this workshop (Workers AI is keyless). If you switch providers:
 
 | Symptom | Fix |
 |---|---|
-| `You need to register a workers.dev subdomain` | open **Workers & Pages** in the dashboard once, or run `npx wrangler subdomain` |
+| `You need to register a workers.dev subdomain` | open **Workers & Pages** in the dashboard once to create it (there's no `wrangler subdomain` command in wrangler 4) |
 | wrangler asks which account | `export CLOUDFLARE_ACCOUNT_ID=<id>` (`npx wrangler whoami` lists them) |
 | `Authentication error` mid-session | `npx wrangler login` again |
 | Workers AI errors on deploy/dev | account must have Workers AI enabled; free daily allocation applies |
