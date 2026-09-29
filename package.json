@@ -8,7 +8,7 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite dev --strictPort",
     "build": "vite build",
     "deploy": "vite build && wrangler deploy",
     "check": "node scripts/check.mjs",
