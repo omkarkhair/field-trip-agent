@@ -380,7 +380,11 @@
     if (pos) lastPos = pos;
     switch (c.type) {
       case 'conversation-reset': messages = c.snapshot.messages.map(clone); break;
-      case 'message-appended': if (!find(c.message.id)) messages.push(clone(c.message)); break;
+      case 'message-appended':
+        // A new conversation's stream replays the user's own message; drop the optimistic copy.
+        if (c.message.role === 'user') messages = messages.filter((m) => !m.id.startsWith('local-'));
+        if (!find(c.message.id)) messages.push(clone(c.message));
+        break;
       case 'message-started': ensureAssistant(c.messageId, c.submissionId); break;
       case 'message-delta': {
         const m = ensureAssistant(c.messageId);
