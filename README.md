@@ -206,7 +206,7 @@ You are helping a workshop attendee build this project checkpoint by checkpoint.
 
 **Load the skill first:** `.agents/skills/build-field-trip-agent/SKILL.md`. It
 contains the verified code and verify command for every checkpoint
-(`references/checkpoints.md`), a Flue cheatsheet, deploy notes, and
+(`references/checkpoints/cpN-*.md`), a Flue cheatsheet, deploy notes, and
 troubleshooting.
 
 **Workflow:** detect the current checkpoint (`git describe --tags`, or inspect

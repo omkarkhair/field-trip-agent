@@ -21,7 +21,8 @@ Read them only when needed:
 
 | File | Read when |
 |---|---|
-| [references/checkpoints.md](references/checkpoints.md) | Implementing or verifying any checkpoint. Contains goal, time budget, files, final code, and verify command for each one. **This is the source of truth for code.** |
+| [references/checkpoints.md](references/checkpoints.md) | Index of checkpoints. Open it to find the file for the checkpoint you need |
+| `references/checkpoints/cpN-*.md` | Implementing or verifying checkpoint N: goal, time budget, concepts, diff, final code, verify command. **Source of truth for code.** Load only the one you need. |
 | [references/flue-cheatsheet.md](references/flue-cheatsheet.md) | You need a Flue API: hooks, `defineTool`, `defineSubagent`, sandbox, durable steps, routing, HTTP protocol |
 | [references/deploy.md](references/deploy.md) | Deploying, migrations, observability/traces, Cloudflare account issues |
 | [references/troubleshooting.md](references/troubleshooting.md) | Anything fails. Check here **before** debugging from scratch |
@@ -51,7 +52,7 @@ counts as the previous checkpoint plus work in progress.
 
 ### 2. Implement the next checkpoint
 
-- Open that checkpoint's section in `references/checkpoints.md` and apply its
+- Open that checkpoint's file (`references/checkpoints/cpN-*.md`) and apply its
   code. Adapt it to the attendee's existing edits rather than overwriting them
   blindly. Show them the diff.
 - **Scope rule:** change only the files that checkpoint lists. Never pull later
