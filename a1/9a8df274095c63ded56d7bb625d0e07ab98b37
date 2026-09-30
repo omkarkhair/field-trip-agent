@@ -1,0 +1,21 @@
+src/agents/field-trip.ts
+  s_2c7aaccb31ed20::t_b3b5a8e668b178 5,46-49,53,59-62
+src/tools/weather.ts
+  s_2c7aaccb31ed20::t_a95489e3cce783 1-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a19a8df274095c63ded56d7bb625d0e07ab98b37",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}
