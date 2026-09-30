@@ -56,7 +56,7 @@ type TripBrief = {
 };
 
 export function FieldTrip() {
-  useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct');
+  useModel('cloudflare/@cf/google/gemma-4-26b-a4b-it');
 
   // Durable, per-conversation state (stored in this conversation's Durable Object).
   // Shaped like React's useState, but it survives restarts and redeploys.
@@ -130,24 +130,37 @@ npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp2-live "What
 you › We're planning an offsite in Lisbon from 2026-10-08 to 2026-10-09 for 14 people, …
 
 agent ›
-  ⚙ save_trip_brief({"city":"Lisbon","startDate":"2026-10-08","endDate":"2026-10-09","headcount":14,"budget":"400 EUR per person","interes…) → {"saved":{…}}
-For a Lisbon offsite, I recommend visiting the Belem Tower … What type of food experiences are you looking for?
+  ⚙ save_trip_brief({"budget":"400 EUR per person","city":"Lisbon","endDate":"2026-10-09","headcount":14,…) → {"saved":{…}}
+I've saved your trip details for Lisbon! You're looking at a 2-day offsite for 14 people …
 
 [advisory] System instructions updated.
 
-✔ completed in 4.5s
+✔ completed in 13.7s
 
 you › Update: two more people are joining, so 16 now.
 agent ›
   ⚙ save_trip_brief({"headcount":16}) → {"saved":{"headcount":16}}
-…
-✔ completed in 4.5s
+I've updated your headcount to 16 people. …
+✔ completed in 12.1s
 
 you › What's my headcount, city and budget? One line.
 agent ›
-Your trip details are: 16 people, Lisbon, with a budget of 400 EUR per person.
-✔ completed in 1.5s
+Your headcount is 16, the city is Lisbon, and the budget is 400 EUR per person.
+✔ completed in 4.5s
 ```
+
+Reference timings (gemma-4-26b-a4b-it): about 12–14 s for a turn with a tool
+call (two model calls), about 4–5 s for a plain answer.
+
+**Optional robustness check** (details and a question in one message):
+
+```bash
+npm run smoke -- http://localhost:5173 cp2-mixed "Offsite in Madrid for 6 people in November. What's my headcount? One line."
+```
+
+Pass: `⚙ save_trip_brief({"city":"Madrid","headcount":6})`, then "6". If the
+reply instead *contains* `save_trip_brief(...)` as text, the model faked the
+call (see troubleshooting).
 
 ## Bonus (optional): show the brief live in the chat UI
 

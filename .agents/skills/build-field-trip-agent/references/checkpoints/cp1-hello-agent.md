@@ -19,8 +19,8 @@
    the conversation history.
 4. **`useModel` is the one required hook,** called exactly once per render.
    `cloudflare/...` runs on Workers AI through the `AI` binding, so no API key is needed.
-   The workshop model, `llama-4-scout`, runs on the free plan (paid alternatives
-   are listed in [flue-cheatsheet.md](../flue-cheatsheet.md#model-choice-tested-with-this-projects-cp2-tool-call)).
+   The workshop model, `gemma-4-26b-a4b-it`, runs on the free plan (paid alternatives
+   are listed in [flue-cheatsheet.md](../flue-cheatsheet.md#model-choice-tested-on-this-project)).
 5. **Adding an agent is a triple:**
    - the `'use agent'` file
    - the `app.route(...)` mount
@@ -62,7 +62,7 @@
 import { useModel } from '@flue/runtime';
 
 export function FieldTrip() {
-  useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct');
+  useModel('cloudflare/@cf/google/gemma-4-26b-a4b-it');
   return `You are FieldTrip, a helpful team-offsite planner. You help groups plan memorable offsites by understanding their destination, dates, headcount, budget, and interests.`;
 }
 ```
@@ -149,19 +149,19 @@ portable.
 ### Sample passing output (reference build, live)
 
 ```
-POST https://field-trip-agent.omkk.workers.dev/agents/field-trip/cp1-scout
-202 accepted · submission sub_01M3P1… · waiting for the reply…
+POST https://field-trip-agent.<subdomain>.workers.dev/agents/field-trip/cp1-gemma
+202 accepted · submission sub_01M3S… · waiting for the reply…
 
 you › Hi, who are you? Two sentences.
 
 agent ›
-I'm FieldTrip, a helpful team-offsite planner. I assist groups in planning
-memorable offsites by understanding their destination, dates, headcount, budget, and interests.
+I am FieldTrip, your dedicated assistant for planning memorable team offsites. I help
+you organize all the key details, including your destination, dates, budget, and team interests.
 
-✔ completed in 3.2s
+✔ completed in 9.7s
 ```
 
-Reference timings: about 1.5–3 s per reply. Deploy upload is about 807 KiB gzipped.
+Reference timings: about 4–10 s per reply (gemma-4-26b-a4b-it). Deploy upload is about 807 KiB gzipped.
 
 ## What to tell the attendee
 

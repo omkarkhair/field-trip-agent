@@ -91,18 +91,39 @@ old code.
 
 **Model never calls `save_trip_brief`**
 → First rule out the wrong-server problem above (the tool list check).
-→ Then check the model. `llama-4-scout` (default), `kimi-k2.6` and
-`glm-5.3` (with `thinkingLevel: 'low'`) all call it reliably. Keep the
-"FIRST action is to call `save_trip_brief`" rule at the top of the instructions.
+→ Then check the model. `gemma-4-26b-a4b-it` (default), `qwen3.8-27b`,
+`glm-4.7-flash`, `kimi-k2.6` and `glm-5.3` (`thinkingLevel: 'low'`) all call
+it reliably. Keep the "FIRST action is to call `save_trip_brief`" rule at the
+top of the instructions. See the model table in `flue-cheatsheet.md`.
+
+**The reply *contains* `save_trip_brief(city="…", …)` as text, but no `⚙` tool call ran**
+→ The model faked the tool call in prose, so nothing was saved. Seen with
+`@cf/meta/llama-4-scout-17b-16e-instruct` whenever a message mixes trip details
+with a question (0/5 in our benchmark).
+→ Use the default `gemma-4-26b-a4b-it`. Teaching point: that's why verify
+checks for a real `⚙` tool part, not for text in the reply.
 
 **`Submission failed … AiError … 5006 … Type mismatch of '/messages/0/content', 'array' not in 'string'`**
 → The model can't accept Flue's structured message content after a tool call.
-Seen with `@cf/meta/llama-3.3-70b-instruct-fp8-fast`.
-→ Switch to `@cf/meta/llama-4-scout-17b-16e-instruct`.
+Seen with `llama-3.3-70b-instruct-fp8-fast` and `mistral-small-3.1-24b-instruct`.
+Not a wrong model ID.
+→ Switch to `@cf/google/gemma-4-26b-a4b-it`.
+
+**`Submission failed … AiError … 8007 … Unexpected role 'user' after role 'tool'`**
+→ The model's chat template rejects a message following a tool result. Seen
+with `qwen3-30b-a3b-fp8` and `gpt-oss-120b`. Not a wrong model ID, and prompt
+changes can't fix it.
+→ Switch to `@cf/google/gemma-4-26b-a4b-it`.
+
+**Replies take 10–20 s**
+→ Expected with `gemma-4-26b-a4b-it` (tool turns take two model calls). The chat
+UI streams tokens as they arrive. The fastest free model, `llama-4-scout`
+(~2–5 s), fakes tool calls on mixed messages, so the workshop trades speed
+for reliability.
 
 **Workers AI error mentioning a paid plan / `require_workers_paid`**
 → `kimi-k2.6`, `glm-5.x`, `deepseek-v4-*` need Workers Paid. Use the default
-`llama-4-scout`, which runs on the free plan.
+`gemma-4-26b-a4b-it`, which runs on the free plan.
 
 **`glm-5.3` is very slow even with `thinkingLevel: 'off'`**
 → Its reasoning is mandatory. `'off'`/`'minimal'`/`'medium'` normalize to

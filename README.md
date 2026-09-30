@@ -244,7 +244,7 @@ hand-writing several checkpoints at once.
 5. `useModel` is required and called **exactly once** per render. Sub-agents
    cannot call `useModel`, `useSandbox`, or `usePersistentState` — set `model` on
    the sub-agent definition instead.
-6. Use the Workers AI model `cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct` — no API keys.
+6. Use the Workers AI model `cloudflare/@cf/google/gemma-4-26b-a4b-it` — no API keys.
    `cloudflare/...` models only work under `vite dev` or when deployed, not `flue run`.
 7. Reserved tool names: `task`, `activate_skill`, `read_skill_resource`, `read`,
    `write`, `edit`, `bash`, `grep`, `glob`.

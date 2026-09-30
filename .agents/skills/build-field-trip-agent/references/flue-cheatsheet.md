@@ -34,7 +34,7 @@ import { Bash, InMemoryFs } from 'just-bash';
 import { type AgentProps, useModel } from '@flue/runtime';
 
 export function FieldTrip({ id }: AgentProps) {
-  useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct'); // required, exactly once per render
+  useModel('cloudflare/@cf/google/gemma-4-26b-a4b-it'); // required, exactly once per render
   return `You plan team offsites. Conversation: ${id}`; // = system prompt
 }
 ```
@@ -247,19 +247,38 @@ Defaults: 10 attempts, 1 h per submission.
 
 ## Workers AI model
 
-`useModel('cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct')` goes through the `AI` binding,
+`useModel('cloudflare/@cf/google/gemma-4-26b-a4b-it')` goes through the `AI` binding,
 which routes via AI Gateway by default and needs no API key. Requires
 `flue({ providers: ['cloudflare'] })` (or no `providers` list) and the `ai`
 binding in `wrangler.jsonc`. Not available under `flue run`.
 
-### Model choice (tested with this project's cp2 tool call)
+### Model choice (tested on this project)
 
-| Model | Plan | Result |
-|---|---|---|
-| `@cf/meta/llama-4-scout-17b-16e-instruct` | **free** | ✔ **workshop default**. Reliable tool calls, ~1.5–5 s per reply |
-| `@cf/moonshotai/kimi-k2.6` | Workers Paid | ✔ works with defaults, ~13 s per reply |
-| `@cf/zai-org/glm-5.3` | Workers Paid | ✔ with `useModel(…, { thinkingLevel: 'low' })`. Reasoning is mandatory; any other level (incl. `'off'`) normalizes to `'max'` (slow). ~12 s |
-| `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | free | ✘ **incompatible**: after the first tool call Workers AI rejects the request (`400 … '/messages/0/content', 'array' not in 'string'`). Don't use |
+Benchmark: cp2 agent, 5 fresh conversations per prompt:
+- **brief** (details only)
+- **mixed** (details + a question in one message)
+- **follow-up** (brief, then a question answered from state)
+
+| Model | Plan | brief | mixed | follow-up | Reply time | Verdict |
+|---|---|---|---|---|---|---|
+| `@cf/google/gemma-4-26b-a4b-it` | **free** | 5/5 | 5/5 | 5/5 | ~5–20 s | ✔ **workshop default** |
+| `@cf/qwen/qwen3.8-27b` | free | 5/5 | 5/5 | 5/5 | ~12–19 s | ✔ alternative |
+| `@cf/zai-org/glm-4.7-flash` | free | 5/5 | 5/5 | 5/5 | ~16–17 s | ✔ alternative |
+| `@cf/meta/llama-4-scout-17b-16e-instruct` | free | 5/5 | **0/5** | 5/5 | ~1.5–5 s | ✘ on mixed messages it *writes* `save_trip_brief(...)` as text instead of calling the tool |
+| `@cf/moonshotai/kimi-k2.6` | Workers Paid | ✔ | — | ✔ | ~13 s | ✔ paid alternative |
+| `@cf/zai-org/glm-5.3` | Workers Paid | ✔ | — | ✔ | ~12 s | ✔ with `useModel(…, { thinkingLevel: 'low' })`. Reasoning is mandatory; other levels (incl. `'off'`) normalize to `'max'` |
+| `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | free | ✘ | ✘ | ✘ | — | incompatible (400, see below) |
+| `@cf/mistralai/mistral-small-3.1-24b-instruct` | free | ✘ | ✘ | ✘ | — | incompatible (400, see below) |
+| `@cf/qwen/qwen3-30b-a3b-fp8` | free | ✘ | ✘ | ✘ | — | incompatible (400, see below) |
+| `@cf/openai/gpt-oss-120b` | free | ✘ | ✘ | ✘ | — | incompatible (400, see below) |
+
+The "incompatible" models are **not wrong IDs** (they're exactly as listed in
+the catalog). Their chat formats reject how Flue structures messages after a
+tool call:
+- `5006 … '/messages/0/content', 'array' not in 'string'`: the model only accepts string content
+- `8007 … Unexpected role 'user' after role 'tool'`: the model rejects a message following a tool result
+
+Prompt changes can't fix either.
 
 List catalog models and their flags with
 `npx wrangler ai models list --json` (look for `function_calling: true`
