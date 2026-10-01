@@ -1,0 +1,23 @@
+src/agents/field-trip.ts
+  s_2c7aaccb31ed20::t_3e4df990e9fe4d 3,6-7,52-59,70-75
+src/subagents/venue-scout.ts
+  s_2c7aaccb31ed20::t_26f0dff5eb085a 1-34
+src/tools/wikipedia.ts
+  s_2c7aaccb31ed20::t_29568f95b6b160 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "668a28618dea48d539e3196796212c18f57bb561",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}
