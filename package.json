@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cloudflare/sandbox": "0.12.10",
     "@flue/runtime": "2.1.1",
     "hono": "4.13.10",
     "just-bash": "3.4.2",
