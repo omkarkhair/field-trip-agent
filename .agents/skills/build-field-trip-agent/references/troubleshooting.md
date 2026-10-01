@@ -253,6 +253,29 @@ point of the demo.
 **The first message of a new conversation is a few seconds slower**
 → Container cold start. Every conversation gets its own container.
 
+## cp6
+
+**No traces / logs in the dashboard**
+→ Check `wrangler.jsonc` has the `observability` block and that you redeployed.
+Ingestion takes a minute or two. Look under the agent's Durable Object
+(`FlueFieldTripAgent`), not the POST request: each response runs as its own unit of work.
+
+**`npx wrangler tail` doesn't show the `forecast` log**
+→ Expected: tail sees the short request/RPC/alarm invocations, but the response
+runs detached from them. Use the dashboard's Logs view.
+
+**`log.info(...)` in a tool shows nothing anywhere**
+→ Flue's tool `log` goes to the runtime event stream (`observe()` subscribers),
+not to Workers Logs. Use `console.log({...})` for Workers Logs.
+
+**The first message right after `npm run deploy` fails with `SandboxDiedError`**
+→ The container was being replaced by the deploy. Resend the message; it works
+once the new container is up (seen once, ~30 s after deploy).
+
+**Local: `SandboxDiedError` keeps repeating after you `docker rm`-ed containers**
+→ Don't remove containers under a running `npm run dev`: the local Sandbox DO
+keeps retrying the vanished one. Stop the dev server, then clear containers, then restart.
+
 ## Known in advance (from the Flue docs)
 
 **Build error mentioning migrations / DO class not found on deploy**
