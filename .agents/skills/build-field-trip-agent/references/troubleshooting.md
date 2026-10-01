@@ -133,6 +133,37 @@ for reliability.
 → Expected. The tool wrote state and the agent re-rendered its instructions.
 That line is the hook model made visible.
 
+## cp3
+
+**`error TS1005: ';' expected` / `TS1443: Module declaration names…` in `field-trip.ts`**
+→ A tool name in the instructions was wrapped in bare backticks inside the
+template literal. Escape them: `` \`geocode_city\` ``.
+
+**`TS2322 … Promise<{ output: { name: unknown; … } }> is not assignable …` in a tool**
+→ `output` must be JSON-typed. `unknown` values (e.g. from
+`Record<string, unknown>`) are rejected. Give the parsed API response a
+concrete type (`{ name: string; latitude: number; … }`).
+
+**`get_forecast ✘ Forecast unavailable … 'start_date' is out of allowed range`**
+→ Expected for dates more than 16 days ahead (or in the past). The model should
+explain the limit. To *pass* verify, use dates 3–10 days from today.
+
+**`geocode_city ✘ No city found named "…"`**
+→ The Open-Meteo geocoder matches city names only. The reference tool already
+strips anything after a comma ("Lisbon, Portugal" → "Lisbon"). Check the spelling.
+
+**The model guesses a forecast without a `⚙ get_forecast` call, or uses the wrong year**
+→ Check that the instructions include `Today is ${today}.` and the weather rule
+(geocode, then forecast, with dates from the saved brief).
+
+**A stray `<turn|>` at the end of a reply**
+→ A gemma end-of-turn token occasionally leaks through Workers AI. It's cosmetic,
+and the turn completed normally. Ignore it.
+
+**Weather turns take 10–20 s**
+→ Expected: three model calls (decide → geocode → forecast → answer) at
+roughly 4–5 s each. The chat UI shows each `⚙` chip as it happens.
+
 ## Known in advance (from the Flue docs)
 
 **Build error mentioning migrations / DO class not found on deploy**

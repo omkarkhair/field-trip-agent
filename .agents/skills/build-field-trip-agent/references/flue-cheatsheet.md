@@ -112,6 +112,9 @@ Mount in the agent with `useTool(geocodeCity)`, or inline with `useTool({ …sam
   not shown to the model), `toolCallId`; `harness` if `harness: true`; `step` if `durable: true`.
 - Return `{ output }` (JSON-serializable), a bare string, or nothing (only when
   there's no `output` schema). Returning a bare object throws, so wrap it in `{ output }`.
+  The output must be JSON-*typed*: values typed `unknown` fail typecheck, so
+  type the parsed API response. (Full verified tools: `checkpoints/cp3-api-tools.md`.)
+- Instructions are a template literal: escape backticks around tool names (`` \`get_forecast\` ``).
 - `{ output, terminate: true }` ends the turn after the batch.
 - Optional: `output` schema, `timeoutMs`.
 - Invalid args → `ToolInputValidationError` goes back to the model, which retries.
