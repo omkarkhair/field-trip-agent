@@ -9,13 +9,17 @@ npm run deploy                                                  # vite build && 
 npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev <id> "<message>"   # test live
 ```
 
-- `npm run deploy` prints the live URL. The Worker name comes from
+- `npm run deploy` prints the live URL. The chat UI is at its root
+  (`https://field-trip-agent.<subdomain>.workers.dev/`). The Worker name comes from
   `wrangler.jsonc` → `field-trip-agent`.
 - `vite build` writes `dist/field_trip_agent/` (code + finalized `wrangler.json`).
   `wrangler deploy` reads it automatically via the Cloudflare plugin's redirect.
   Always deploy from the project root and **never** pass `--config`.
 - Validate without deploying: `npx vite build && npx wrangler deploy --dry-run`.
-  At cp0 the upload is about 573 KiB gzipped.
+  The upload is about 573 KiB gzipped at cp0 and about 807 KiB from cp1 on.
+- Deploy output should list both bindings:
+  `env.FLUE_FIELD_TRIP_AGENT (FlueFieldTripAgent)  Durable Object` and `env.AI`.
+- Don't put `account_id` in `wrangler.jsonc`; use `CLOUDFLARE_ACCOUNT_ID` if needed.
 - Local and live conversations are separate: local DOs live in `.wrangler/state`,
   live DOs in your account.
 
@@ -55,6 +59,20 @@ reorder, or delete an entry that has been deployed.
 
 - Use `new_sqlite_classes`, **not** `new_classes`: Flue requires DO SQLite.
 - Subagents are not DOs and need no migration.
+- The cp5 `Sandbox` class is a DO you declare yourself: `v2` migration plus a
+  `durable_objects.bindings` entry (unlike Flue's agent classes, Flue does not add it).
+
+## Containers (cp5)
+
+- `npm run deploy` **builds the image locally with Docker and pushes it** to
+  Cloudflare's registry (~200 MB compressed, ~1–2 min on good Wi-Fi). Docker must be
+  running. Later deploys push only changed layers (usually none).
+- The output shows `Deploy a container application … NEW field-trip-agent-sandbox`
+  the first time.
+- A redeploy **replaces running containers**: their files are gone; agent state is not.
+- `max_instances: 10` caps concurrent containers (one per active conversation).
+  Idle containers sleep after ~10 min.
+- Bundle grows from ~0.6 to ~0.97 MiB gzipped (limit: 3 MiB free / 10 MiB paid).
 
 ## Secrets
 
@@ -77,7 +95,10 @@ Not needed for this workshop (Workers AI is keyless). If you switch providers:
 - **Traces:** one trace per agent response (the DO alarm invocation that ran it),
   with Flue spans `invoke_agent` → `chat` (per model turn, with token usage) →
   `execute_tool` (per tool call). Spans include conversation content by default.
-- Live tail from the terminal: `npx wrangler tail field-trip-agent`.
+- Live tail from the terminal: `npx wrangler tail field-trip-agent` (shows request/RPC/alarm
+  invocations; a response's own `console.log` lines appear in the dashboard, not in tail).
+- Tool logs for Workers Logs: `console.log({ event: '…', … })`. Flue's `log.info` goes to
+  `observe()` subscribers only.
 - Dashboard: **Workers & Pages → field-trip-agent → Observability**.
 - Locally, `vite dev` captures spans too (tables `spans`, `logs`; span columns
   `trace_id, span_id, parent_id, service, name, kind, start_ms, duration_ms, outcome, error, attributes`):

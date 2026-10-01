@@ -21,7 +21,8 @@ Read them only when needed:
 
 | File | Read when |
 |---|---|
-| [references/checkpoints.md](references/checkpoints.md) | Implementing or verifying any checkpoint. Contains goal, time budget, files, final code, and verify command for each one. **This is the source of truth for code.** |
+| [references/checkpoints.md](references/checkpoints.md) | Index of checkpoints. Open it to find the file for the checkpoint you need |
+| `references/checkpoints/cpN-*.md` | Implementing or verifying checkpoint N: goal, time budget, concepts, diff, final code, verify command. **Source of truth for code.** Load only the one you need. |
 | [references/flue-cheatsheet.md](references/flue-cheatsheet.md) | You need a Flue API: hooks, `defineTool`, `defineSubagent`, sandbox, durable steps, routing, HTTP protocol |
 | [references/deploy.md](references/deploy.md) | Deploying, migrations, observability/traces, Cloudflare account issues |
 | [references/troubleshooting.md](references/troubleshooting.md) | Anything fails. Check here **before** debugging from scratch |
@@ -51,7 +52,7 @@ counts as the previous checkpoint plus work in progress.
 
 ### 2. Implement the next checkpoint
 
-- Open that checkpoint's section in `references/checkpoints.md` and apply its
+- Open that checkpoint's file (`references/checkpoints/cpN-*.md`) and apply its
   code. Adapt it to the attendee's existing edits rather than overwriting them
   blindly. Show them the diff.
 - **Scope rule:** change only the files that checkpoint lists. Never pull later
@@ -72,6 +73,11 @@ counts as the previous checkpoint plus work in progress.
   The script POSTs the message, waits for the submission to settle, and prints
   the reply plus every tool call as `⚙ tool(input) → output`. It exits non-zero
   on failure. Set `VERBOSE=1` for full tool payloads.
+- **For the attendee (optional):** the same conversation can be opened in the
+  browser chat UI at `http://localhost:5173` (or the live URL). It streams
+  replies and shows tool calls as expandable chips. It keeps its own
+  conversation id (shown in the header), separate from smoke ids. The UI is
+  scaffolding in `src/ui/index.html`: don't modify it unless the attendee asks.
 - For checkpoints that deploy (cp1, cp6, cp7): run `npm run deploy`, then the
   same smoke command against the printed `https://field-trip-agent.<subdomain>.workers.dev` URL.
 - If verification fails: check `references/troubleshooting.md`, fix it, and
@@ -116,7 +122,7 @@ If they want to keep their own edits, compare them with
 3. **Every exported capitalized function in a `'use agent'` module becomes an
    agent** (and needs a migration). Subagent functions are never exported from
    there. They live in `src/subagents/*.ts` via `defineSubagent`.
-4. `useModel('cloudflare/@cf/moonshotai/kimi-k2.6')` is called exactly once per
+4. `useModel('cloudflare/@cf/google/gemma-4-26b-a4b-it')` is called exactly once per
    render in the parent. Subagents can't call `useModel`, `useSandbox`, or
    `usePersistentState`.
 5. Tools: valibot `input` schema, return `{ output }` or a string, **throw** on
@@ -129,3 +135,8 @@ If they want to keep their own edits, compare them with
 8. When flueframework.com and the installed package disagree, trust
    `npx flue docs read <page>`, which ships with the installed version (2.1.1).
 9. Never create or commit `.dev.vars`/`.env` secrets. Workers AI needs no API keys.
+10. **Keep diffs minimal.** Some attendees paste code by hand: make the smallest
+    change that passes verify, and show the checkpoint's *Diff* section rather
+    than whole files when explaining.
+11. cp5 needs Docker running and an account with Containers. Pin
+    `@cloudflare/sandbox@0.12.10` (1.x breaks Flue 2.1.1) with a matching `Dockerfile` tag.
