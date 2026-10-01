@@ -6,7 +6,7 @@ Everything here should be done **before** the session. The starter on `main`
 ## Steps
 
 1. **Node.js ≥ 22.19**: `node --version`
-2. **Cloudflare account** (the free plan works: the default model `gemma-4-26b-a4b-it` runs on it) with a `workers.dev` subdomain.
+2. **Cloudflare account** with a `workers.dev` subdomain. Use the **workshop account** you were given: it has Containers enabled, which cp5 needs. (On your own account, cp1–cp4 run on the free plan; cp5 onward needs Workers Paid for Containers.)
    First-time users: open **Workers & Pages** in <https://dash.cloudflare.com>
    once so the subdomain gets created.
 3. **Clone + install**
@@ -18,6 +18,14 @@ Everything here should be done **before** the session. The starter on `main`
 4. **Log in**: `npx wrangler login` (opens a browser; approve the OAuth scopes,
    which include Workers AI)
 5. **Check**: `npm run check`
+5b. **Docker (for cp5)**: install Docker Desktop or OrbStack, start it, and check `docker info`.
+    On Apple Silicon, set Docker's memory to **≥ 4 GB** (Settings → Resources):
+    the sandbox image is amd64 and runs emulated (~1.3 GB per container).
+    Pre-pull the image so it isn't downloaded on conference Wi-Fi:
+    ```bash
+    docker pull --platform linux/amd64 docker.io/cloudflare/sandbox:0.12.10
+    ```
+    `npm run check` doesn't test Docker; `docker info` printing a server version is the pass.
 6. **Dev server smoke**
    ```bash
    npm run dev                              # terminal 1
@@ -59,7 +67,8 @@ Exit code 0 means ready.
 
 `@flue/runtime` `@flue/vite` `@flue/cli` 2.1.1 · `@cloudflare/vite-plugin` 1.62.0 ·
 `wrangler` 4.143.0 · `vite` 8.3.1 · `hono` 4.13.10 · `valibot` 1.5.0 ·
-`just-bash` 3.4.2 · `typescript` 7.0.2
+`just-bash` 3.4.2 · `typescript` 7.0.2 · from cp5: `@cloudflare/sandbox` 0.12.10
+(**not** 1.x: Flue 2.1.1's `cloudflareSandbox()` needs the 0.x `exec` API)
 
 Don't upgrade during the workshop: the checkpoint code is verified against
 exactly these versions.

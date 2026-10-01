@@ -22,7 +22,7 @@ through a durable tool that survives a redeploy.
 | The Flue hook model | `useModel`, `usePersistentState`, `useTool`, `useSubagent`, `useSandbox` — the agent re-renders before every model call |
 | Tools that call external APIs | `defineTool` + [valibot](https://valibot.dev) schemas → Open-Meteo and Wikipedia |
 | Sub-agent delegation | A `venue-scout` sub-agent with its own tool, its own model, and a fresh context |
-| Sandbox strategies | No sandbox → in-memory virtual sandbox → Cloudflare container |
+| Sandbox strategies | No sandbox → in-memory virtual sandbox → Cloudflare Computer → Cloudflare Sandbox container (built) |
 | Deploy, test, iterate | `vite dev` → `wrangler deploy` → test live → read traces |
 | Durable Objects | One Durable Object per conversation; persistent state; durable tool steps that replay after a crash |
 
@@ -33,7 +33,7 @@ through a durable tool that survives a redeploy.
 Please do this **before** you arrive — conference Wi-Fi is not your friend.
 
 1. **Install Node.js 22.19 or newer** — `node --version`
-2. **Have a Cloudflare account** (free plan is fine; the workshop model runs on it) with a `workers.dev`
+2. **Have a Cloudflare account** (use the workshop account you were given; it has Containers enabled for cp5) with a `workers.dev`
    subdomain. If you've never deployed a Worker, open
    **Workers & Pages** in the [dashboard](https://dash.cloudflare.com) once so the
    subdomain gets created.
@@ -43,22 +43,26 @@ Please do this **before** you arrive — conference Wi-Fi is not your friend.
    cd field-trip-agent
    npm install
    ```
-4. **Log in to Cloudflare:**
+4. **Install and start Docker** (Docker Desktop or OrbStack; needed from cp5). On Apple Silicon, give it ≥ 4 GB of memory, then pre-pull the sandbox image:
+   ```bash
+   docker pull --platform linux/amd64 docker.io/cloudflare/sandbox:0.12.10
+   ```
+5. **Log in to Cloudflare:**
    ```bash
    npx wrangler login
    ```
-5. **Check everything:**
+6. **Check everything:**
    ```bash
    npm run check
    ```
    All lines should be green. If not, see [Troubleshooting](#troubleshooting).
-6. **Smoke test the dev server:**
+7. **Smoke test the dev server:**
    ```bash
    npm run dev
    # in another terminal
    curl http://localhost:5173/api/ping      # → pong
    ```
-7. **Open the chat UI** at <http://localhost:5173>. Until checkpoint 1 it tells
+8. **Open the chat UI** at <http://localhost:5173>. Until checkpoint 1 it tells
    you no agent is mounted yet. That's expected.
 
 **No model API keys are needed.** The agent uses
@@ -103,7 +107,7 @@ catch up.
 | `cp2` | **Hooks + persistent state** | `usePersistentState('brief')` + a `save_trip_brief` tool | a second message remembers your headcount |
 | `cp3` | **Tools calling external APIs** | `geocode_city`, `get_forecast` (Open-Meteo) | a weather question shows tool calls in the conversation |
 | `cp4` | **Sub-agent delegation** | Wikipedia tools; a `venue-scout` sub-agent with its own tool and model | the parent finds places, calls `task`, and combines the scout's assessment with the weather |
-| `cp5` | **Sandbox** | a virtual `just-bash` sandbox | the agent writes and returns `itinerary.md` |
+| `cp5` | **Sandbox** | a Cloudflare Sandbox container per conversation | the agent writes `itinerary.md` and reads it back |
 | `cp6` | **Iterate + observe** | change behavior, redeploy, turn on traces | new behavior live; traces in the Cloudflare dashboard |
 | `cp7` | **Durability** *(stretch)* | a `durable: true` booking tool using `step.do` | a redeploy mid-booking still books exactly once |
 
@@ -194,7 +198,7 @@ scripts/                        # check.mjs, smoke.mjs (plain Node — works on 
 | Deploy fails with a Durable Object / migration error | Every agent needs a `new_sqlite_classes` migration in `wrangler.jsonc` — see cp1 |
 | `cloudflare/...` model errors under `flue run` | Workers AI models only run under `npm run dev` or deployed — not `flue run` |
 | POST returns `202` but no reply yet | Replies are async — poll `GET .../<id>?view=history` or use `npm run smoke` |
-| Files the agent wrote are gone | The virtual sandbox is in-memory and rebuilt per message; persistent state is what survives |
+| Files the agent wrote are gone | The container was replaced (redeploy) or slept (~10 min idle); persistent state is what survives |
 | Stuck? | `git switch -c fresh cpN` and carry on |
 
 More gotchas live in the skill's
@@ -252,8 +256,9 @@ hand-writing several checkpoints at once.
 8. Tools: validate input with valibot, return `{ output }` or a string, **throw**
    on failure so the model can recover, and pass `signal` to every `fetch`.
    Wikipedia requests need a descriptive `User-Agent` header.
-9. The virtual sandbox is ephemeral. Anything that must survive goes in
-   `usePersistentState`.
+9. Sandbox files (the cp5 container) don't survive a sleep or redeploy. Anything
+   that must survive goes in `usePersistentState`. Keep `@cloudflare/sandbox` at
+   `0.12.10` (not 1.x) and the `Dockerfile` tag equal to it.
 10. In `durable: true` tools, every side effect goes inside `step.do(name, fn)`
     with a deterministic `name`.
 11. Never commit `.dev.vars`, `.env`, or secrets.

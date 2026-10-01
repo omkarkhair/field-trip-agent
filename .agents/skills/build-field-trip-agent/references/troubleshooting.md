@@ -206,6 +206,53 @@ this out as *why* the model, not code, picks the places.
 → Subagents can't use instance hooks. Set `model` on the `defineSubagent`
 definition instead.
 
+## cp5
+
+**`npm run dev` hangs on "Building container images…" or fails with a Docker error**
+→ Docker isn't running (`docker info` must print a server version). Start
+Docker Desktop/OrbStack and restart `npm run dev`. The first build pulls
+~200 MB; pre-pull with `docker pull --platform linux/amd64 docker.io/cloudflare/sandbox:0.12.10`.
+
+**`SandboxDiedError: Sandbox exists failed: the sandbox stopped while the call was in flight`**
+**/ `Container exited with unexpected exit code: 137`** (local)
+→ Docker ran out of memory and killed the container. On Apple Silicon the amd64
+image runs emulated at ~1.3 GB per container, and **every conversation id
+starts its own container**. Fix: raise Docker memory to ≥ 4 GB, reuse one
+conversation id, and clear old containers:
+`docker ps -q --filter name=workerd-field-trip-agent | xargs docker rm -f`.
+A single 137 during a cold start can retry on its own; repeated ones are memory.
+
+**The itinerary turn times out; the reasoning ends in `most, most, most, …`**
+→ Gemma fell into a repetition loop while echoing the file back. Rule 5 must
+say "Do not repeat the file in your reply … reply in one sentence". The user
+sees the file through the `read` result.
+
+**`exec` errors like `sandbox.exec(...).then is not a function` / stdout undefined after `npm install`**
+→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.1.1 needs
+0.x: `npm install --save-exact @cloudflare/sandbox@0.12.10` and keep the
+Dockerfile tag the same.
+
+**Container errors after changing the package version**
+→ The `Dockerfile` tag must equal the `@cloudflare/sandbox` version in
+`package.json` (`0.12.10` ↔ `cloudflare/sandbox:0.12.10`). Restart `npm run dev`
+to rebuild the image.
+
+**`Cannot find module 'cloudflare:workers'` in `npm run typecheck`**
+→ Add the `declare module 'cloudflare:workers'` block to `src/env.d.ts`. The build
+works without it; only the typechecker needs it.
+
+**Deploy fails mentioning containers / not entitled / `max_instances`**
+→ The account doesn't have Containers enabled. Use the workshop account
+(`npx wrangler whoami` shows which one you're on), or Workers Paid.
+
+**`itinerary.md` is gone**
+→ Expected after a redeploy or ~10 min idle: the container was replaced or
+slept. The brief survives because it's state in the agent's DO. That's the
+point of the demo.
+
+**The first message of a new conversation is a few seconds slower**
+→ Container cold start. Every conversation gets its own container.
+
 ## Known in advance (from the Flue docs)
 
 **Build error mentioning migrations / DO class not found on deploy**

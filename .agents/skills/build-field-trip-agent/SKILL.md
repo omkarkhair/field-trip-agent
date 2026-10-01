@@ -135,3 +135,8 @@ If they want to keep their own edits, compare them with
 8. When flueframework.com and the installed package disagree, trust
    `npx flue docs read <page>`, which ships with the installed version (2.1.1).
 9. Never create or commit `.dev.vars`/`.env` secrets. Workers AI needs no API keys.
+10. **Keep diffs minimal.** Some attendees paste code by hand: make the smallest
+    change that passes verify, and show the checkpoint's *Diff* section rather
+    than whole files when explaining.
+11. cp5 needs Docker running and an account with Containers. Pin
+    `@cloudflare/sandbox@0.12.10` (1.x breaks Flue 2.1.1) with a matching `Dockerfile` tag.

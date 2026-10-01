@@ -59,6 +59,20 @@ reorder, or delete an entry that has been deployed.
 
 - Use `new_sqlite_classes`, **not** `new_classes`: Flue requires DO SQLite.
 - Subagents are not DOs and need no migration.
+- The cp5 `Sandbox` class is a DO you declare yourself: `v2` migration plus a
+  `durable_objects.bindings` entry (unlike Flue's agent classes, Flue does not add it).
+
+## Containers (cp5)
+
+- `npm run deploy` **builds the image locally with Docker and pushes it** to
+  Cloudflare's registry (~200 MB compressed, ~1–2 min on good Wi-Fi). Docker must be
+  running. Later deploys push only changed layers (usually none).
+- The output shows `Deploy a container application … NEW field-trip-agent-sandbox`
+  the first time.
+- A redeploy **replaces running containers**: their files are gone; agent state is not.
+- `max_instances: 10` caps concurrent containers (one per active conversation).
+  Idle containers sleep after ~10 min.
+- Bundle grows from ~0.6 to ~0.97 MiB gzipped (limit: 3 MiB free / 10 MiB paid).
 
 ## Secrets
 
