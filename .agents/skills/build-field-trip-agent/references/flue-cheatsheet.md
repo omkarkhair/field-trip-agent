@@ -151,33 +151,37 @@ changes to the model. `useModel` must never be conditional.
 ```ts
 // src/subagents/venue-scout.ts  — ordinary module, NOT 'use agent'
 import { defineSubagent, useTool } from '@flue/runtime';
-import { findNearbyPlaces, getPlaceSummary } from '../tools/wikipedia.ts';
+import { getPlaceSummary } from '../tools/wikipedia.ts';
 
 function VenueScout() {                       // not exported from any 'use agent' file
-  useTool(findNearbyPlaces);
-  useTool(getPlaceSummary);
-  return 'You research offsite venues near a location and return a short, cited shortlist.';
+  useTool(getPlaceSummary);                   // its own tools only
+  return 'You assess a few places for a team offsite … end with this exact format: …';
 }
 
 export const venueScout = defineSubagent({
   name: 'venue-scout',
-  description: 'Researches venues near a lat/lon and returns a shortlist with one-line reasons.',
+  description: 'Assesses up to 3 places … Prompt with the exact titles, city, headcount, interests.',
   agent: VenueScout,
-  // model: 'cloudflare/@cf/...',            // optional override; inherits parent model
+  model: 'cloudflare/@cf/meta/llama-4-scout-17b-16e-instruct', // optional; inherits the parent model
+  // thinkingLevel: 'low',                 // optional; inherits
 });
 ```
 
 Parent: `useSubagent(venueScout)`. The model delegates by calling the built-in
-**`task`** tool with `{ agent: 'venue-scout', prompt }`.
+**`task`** tool with `{ agent: 'venue-scout', description, prompt }`.
+Full verified code: `checkpoints/cp4-subagent.md`.
 
-- The child gets a **fresh context**: none of the parent's history, tools, or
-  state. **The prompt must be a complete briefing** (city, lat/lon, headcount,
-  interests), so say so in the parent's instructions.
-- It shares the parent's sandbox (if any) and model.
-- Only its final message returns, as the `task` result.
+- The child gets a **fresh context**: none of the parent's history, tools,
+  instructions, or state. **The prompt must be a complete briefing**, so say
+  what to include in the parent's instructions.
+- It shares the parent's sandbox (if any) and inherits its model unless `model` is set.
+- Only its final message returns, as the `task` result. Give it a fixed
+  output format.
 - Inside a subagent: `useTool`, `useSkill`, `useInstruction`, and nested
   `useSubagent` work. `useModel`, `useSandbox`, and `usePersistentState` **throw**.
-- Delegation depth cap: 4. Tasks in one batch run in parallel.
+- Delegation depth cap: 4. `task` calls *in one batch* run in parallel, but
+  Gemma on Workers AI emits one tool call per turn, so prefer one task with a
+  list over one task per item (see cp4's design note).
 
 ## Sandboxes
 
@@ -282,6 +286,15 @@ tool call:
 - `8007 … Unexpected role 'user' after role 'tool'`: the model rejects a message following a tool result
 
 Prompt changes can't fix either.
+
+**Gemma and `thinkingLevel`:** Gemma 4 has no reasoning-effort levels. Thinking
+can only be toggled with `chat_template_kwargs.enable_thinking`, which Flue 2.1.1
+doesn't send, so `thinkingLevel` has no effect on it. Don't set it.
+
+**Subagent model (cp4):** `venue-scout` runs on `llama-4-scout`. Its weakness
+(faking tool calls on *mixed* user messages) doesn't show up with a clean,
+single-purpose task briefing, and it does the scout's job in ~5 s vs ~40 s on
+Gemma.
 
 List catalog models and their flags with
 `npx wrangler ai models list --json` (look for `function_calling: true`

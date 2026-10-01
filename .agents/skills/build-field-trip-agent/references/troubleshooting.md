@@ -164,6 +164,48 @@ and the turn completed normally. Ignore it.
 → Expected: three model calls (decide → geocode → forecast → answer) at
 roughly 4–5 s each. The chat UI shows each `⚙` chip as it happens.
 
+## cp4
+
+**`Timed out after 180s` on the suggestion turn**
+→ Run it with `TIMEOUT_S=200`. The work keeps going after a timeout, so
+re-run `npm run smoke -- <url> <id>` (no message) to read the result. If turns
+regularly exceed ~60 s, check that the parent sends **one** `task` (rule 4c)
+and that the scout has `model: '…llama-4-scout…'`. On Gemma, the scout takes
+~40 s per task.
+
+**Several `⚙ task` calls in a row, each 20–30 s, and 2+ minutes in total**
+→ The parent is sending one task per place. Gemma emits one tool call per turn,
+so they run one after another, not in parallel. Use the reference rule 4c:
+"Call `task` ONCE … for all 3 places".
+
+**`⚙ task(...) → (task completed with no text)`**
+→ The child finished without a final message, usually because its job was too
+long (many chained tool calls). Keep the scout's job small (one summary per
+place) and end its instructions with a fixed output format ("Always finish
+with this exact format …").
+
+**The turn ends after a task with no final reply, or the reasoning contains `<|tool_call>call:task{…}`**
+→ Gemma occasionally writes a tool call in raw template tokens inside its
+reasoning, so it never runs. It happened with one-task-per-place fan-out and
+not with the single-task design. Re-send the message. Setting `thinkingLevel`
+won't help: Gemma ignores it.
+
+**`distanceM` is `0` for most places**
+→ The geosearch query needs `colimit: 'max'`. `prop=coordinates` only returns
+coordinates for 10 pages by default.
+
+**`find_nearby_places` returns stations, banks, embassies, battles…**
+→ Expected: Wikipedia geosearch is noisy. The parent filters (rule 4b). Point
+this out as *why* the model, not code, picks the places.
+
+**Wikipedia returns 403 / `Please set a user-agent`**
+→ Every Wikipedia request needs a descriptive `User-Agent` header (see
+`HEADERS` in `wikipedia.ts`).
+
+**`Error: useModel() … cannot be called inside a subagent`** (or `useSandbox` / `usePersistentState`)
+→ Subagents can't use instance hooks. Set `model` on the `defineSubagent`
+definition instead.
+
 ## Known in advance (from the Flue docs)
 
 **Build error mentioning migrations / DO class not found on deploy**

@@ -21,7 +21,7 @@ through a durable tool that survives a redeploy.
 | Creating an agent | An agent *is* a function that returns its instructions, marked with `'use agent'` |
 | The Flue hook model | `useModel`, `usePersistentState`, `useTool`, `useSubagent`, `useSandbox` — the agent re-renders before every model call |
 | Tools that call external APIs | `defineTool` + [valibot](https://valibot.dev) schemas → Open-Meteo and Wikipedia |
-| Sub-agent delegation | A `venue-scout` sub-agent with its own tools and a fresh context |
+| Sub-agent delegation | A `venue-scout` sub-agent with its own tool, its own model, and a fresh context |
 | Sandbox strategies | No sandbox → in-memory virtual sandbox → Cloudflare container |
 | Deploy, test, iterate | `vite dev` → `wrangler deploy` → test live → read traces |
 | Durable Objects | One Durable Object per conversation; persistent state; durable tool steps that replay after a crash |
@@ -73,7 +73,8 @@ You tell it about an offsite — **city, dates, headcount, budget, interests** �
 
 1. Saves the **trip brief** and remembers it across messages.
 2. Checks the **weather** for your dates.
-3. Asks its **`venue-scout`** sub-agent to research venues nearby.
+3. Finds places nearby and asks its **`venue-scout`** sub-agent to assess them
+   (activities, visit length, weather dependency), then matches them to the forecast.
 4. Writes an **itinerary** to `itinerary.md` in its sandbox.
 5. *(stretch)* **Books** the offsite through a mock booking API — exactly once,
    even if the Worker is redeployed mid-booking.
@@ -101,7 +102,7 @@ catch up.
 | `cp1` | **Hello agent + first deploy** | `src/agents/field-trip.ts`, mount it in `src/app.ts`, add a Durable Object migration | agent replies locally **and** on your `workers.dev` URL |
 | `cp2` | **Hooks + persistent state** | `usePersistentState('brief')` + a `save_trip_brief` tool | a second message remembers your headcount |
 | `cp3` | **Tools calling external APIs** | `geocode_city`, `get_forecast` (Open-Meteo) | a weather question shows tool calls in the conversation |
-| `cp4` | **Sub-agent delegation** | `venue-scout` sub-agent with Wikipedia tools | the parent calls `task` and gets a venue shortlist back |
+| `cp4` | **Sub-agent delegation** | Wikipedia tools; a `venue-scout` sub-agent with its own tool and model | the parent finds places, calls `task`, and combines the scout's assessment with the weather |
 | `cp5` | **Sandbox** | a virtual `just-bash` sandbox | the agent writes and returns `itinerary.md` |
 | `cp6` | **Iterate + observe** | change behavior, redeploy, turn on traces | new behavior live; traces in the Cloudflare dashboard |
 | `cp7` | **Durability** *(stretch)* | a `durable: true` booking tool using `step.do` | a redeploy mid-booking still books exactly once |
