@@ -45,8 +45,10 @@ or a dropped connection), and the UI fell back to polling the snapshot every
 1.5 s. Replies still arrive, just all at once. No action needed.
 
 **Chat UI shows an old conversation / you want a clean slate**
-→ Click **New conversation**. The id is kept in `localStorage`
-(`fieldtrip.conversationId`) and is independent of the ids you use with `npm run smoke`.
+→ Click **New conversation**. The id lives in the URL (`/?id=web-xxxxxx`): bookmark
+it, open several tabs with different ids, or open a smoke conversation with
+`/?id=<smoke-id>`. Older checkpoint tags still keep the id in `localStorage`
+and show a cp2 bonus card and a cp7 chip; ignore those.
 
 **Fonts look plain in the UI**
 → Space Grotesk / JetBrains Mono load from Google Fonts. Offline, the UI falls

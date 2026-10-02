@@ -139,7 +139,9 @@ to checkpoint 3"* — the skill knows how.
 
 **In the browser:** open <http://localhost:5173> (or your `workers.dev` URL). The
 chat UI streams replies live, shows every tool call as an expandable chip, and
-has example prompts for each checkpoint. **New conversation** starts a fresh
+has example prompts for each checkpoint (click one, then **Send**). The conversation
+id is in the URL (`/?id=…`): bookmark it, open several conversations in tabs, or
+open a smoke conversation with `/?id=offsite-1`. **New conversation** starts a fresh
 Durable Object.
 
 **From the terminal:**
