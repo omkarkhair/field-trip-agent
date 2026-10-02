@@ -8,6 +8,8 @@ URL that plans a team offsite: it remembers the trip brief, checks the weather,
 delegates venue research to a sub-agent, writes an itinerary, and books the trip
 through a durable tool that survives a redeploy.
 
+**Try the live demo:** <https://field-trip-agent.omkk.workers.dev/>
+
 > **Using a coding agent** (OpenCode, Claude Code, Cursor, ...)? Point it at this
 > README and the skill in [`.agents/skills/build-field-trip-agent/`](.agents/skills/build-field-trip-agent/SKILL.md).
 > Rules for agents are at the [bottom of this file](#for-coding-agents).
