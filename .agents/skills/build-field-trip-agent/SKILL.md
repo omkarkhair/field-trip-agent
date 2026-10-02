@@ -75,8 +75,9 @@ counts as the previous checkpoint plus work in progress.
   on failure. Set `VERBOSE=1` for full tool payloads.
 - **For the attendee (optional):** the same conversation can be opened in the
   browser chat UI at `http://localhost:5173` (or the live URL). It streams
-  replies and shows tool calls as expandable chips. It keeps its own
-  conversation id (shown in the header), separate from smoke ids. The UI is
+  replies and shows tool calls as expandable chips. The conversation id is in
+  the URL (`/?id=<id>`), so `/?id=cp2-local` opens the same conversation a smoke
+  command used, and bookmarks/tabs keep separate conversations. The UI is
   scaffolding in `src/ui/index.html`: don't modify it unless the attendee asks.
 - For checkpoints that deploy (cp1, cp6, cp7): run `npm run deploy`, then the
   same smoke command against the printed `https://field-trip-agent.<subdomain>.workers.dev` URL.
