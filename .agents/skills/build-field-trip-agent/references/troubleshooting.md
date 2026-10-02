@@ -243,6 +243,13 @@ to rebuild the image.
 → Add the `declare module 'cloudflare:workers'` block to `src/env.d.ts`. The build
 works without it; only the typechecker needs it.
 
+**`npm run deploy` ends with `Login failed with code: 1` after `lookup registry.cloudflare.com … no such host`**
+→ Docker's VM lost DNS (common on flaky Wi-Fi). The Worker itself **was** uploaded
+(`Uploaded field-trip-agent`), only the image push step failed; if the `Dockerfile`
+didn't change, the old image keeps working. Check with
+`docker run --rm alpine nslookup registry.cloudflare.com`, then re-run `npm run deploy`.
+Not a wrangler login problem.
+
 **Deploy fails mentioning containers / not entitled / `max_instances`**
 → The account doesn't have Containers enabled. Use the workshop account
 (`npx wrangler whoami` shows which one you're on), or Workers Paid.
