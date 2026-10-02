@@ -251,7 +251,8 @@ slept. The brief survives because it's state in the agent's DO. That's the
 point of the demo.
 
 **The first message of a new conversation is a few seconds slower**
-→ Container cold start. Every conversation gets its own container.
+→ Container cold start. In cp5 every conversation starts its container on the
+first message; cp6 makes it lazy (only when the itinerary needs files).
 
 ## cp6
 
@@ -263,6 +264,18 @@ Ingestion takes a minute or two. Look under the agent's Durable Object
 **`npx wrangler tail` doesn't show the `forecast` log**
 → Expected: tail sees the short request/RPC/alarm invocations, but the response
 runs detached from them. Use the dashboard's Logs view.
+
+**`[advisory] The agent's execution environment (sandbox) was replaced.` in the output**
+→ Expected (cp6+): `open_workspace` flipped the `workspace` flag and Flue attached
+the sandbox at the next turn boundary. It appears once per conversation.
+
+**The model writes the itinerary as text, or says it has no `write` tool**
+→ It skipped `open_workspace`. Check rule 5 starts with "if you have no `write`
+tool yet, call `open_workspace` first", and resend.
+
+**"Hi" still starts a container (cp6+)**
+→ That conversation already opened the workspace: the flag is persistent state,
+so every later message re-attaches. Use a fresh conversation id.
 
 **`log.info(...)` in a tool shows nothing anywhere**
 → Flue's tool `log` goes to the runtime event stream (`observe()` subscribers),
