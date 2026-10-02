@@ -204,7 +204,9 @@ migration, and `containers: [{ class_name, image: "./Dockerfile", max_instances 
 - Adds built-in tools `read`, `write`, `edit`, `bash`, `grep`, `glob` (cwd `/workspace`).
 - At most once per render; the factory is lazy (built once per initialization).
   Initialization touches the sandbox (workspace discovery), so **every
-  conversation starts a container**, even if it never uses a file tool.
+  conversation starts a container**, even if it never uses a file tool. cp6 fixes that
+  by gating it: `if (workspace) useSandbox(...)`, with a tool that sets the persistent
+  `workspace` flag. Flue swaps the environment at the next turn boundary (`environment` signal).
 - Container files survive while it's awake; a sleep or redeploy wipes them.
   Durable facts go in `usePersistentState`.
 - `@cloudflare/sandbox` 1.x changed `exec()` to return a process handle; Flue
