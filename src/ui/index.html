@@ -163,9 +163,6 @@
   .chip:hover { border-style: dashed; border-color: var(--orange); color: var(--text); }
   .chip:active { transform: translateY(1px) scale(0.98); }
   .chip .cp { color: var(--orange); font-weight: 500; }
-  .bonus { border-left: 4px solid var(--ai); }
-  .bonus p { font-size: 14px; margin: 0 0 10px; color: var(--muted); }
-  .bonus blockquote { margin: 0 0 12px; font: 12px/1.5 var(--mono); background: var(--bg-100); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px; color: var(--text); }
   .status { font: 12px var(--mono); color: var(--muted); display: grid; gap: 6px; }
   .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--subtle); margin-right: 6px; }
   .status .dot.live { background: var(--success); }
@@ -206,13 +203,6 @@
       <div class="examples" id="examples"></div>
     </div>
 
-    <div class="card bonus">
-      <h3>Bonus · cp2</h3>
-      <p>Show the saved trip brief live on this page. This UI already renders any <code>data-*</code> part the agent writes, so you only need agent code. Ask your coding agent:</p>
-      <blockquote id="bonus-prompt">Implement the cp2 bonus: add a useDataWriter('brief') channel to the FieldTrip agent and write the merged brief every time save_trip_brief runs.</blockquote>
-      <button class="btn small" id="copy-bonus" type="button">Copy prompt</button>
-    </div>
-
     <div class="card">
       <h3>Connection</h3>
       <div class="status">
@@ -227,7 +217,7 @@
 <script>
 (() => {
   const AGENT_PATH = new URLSearchParams(location.search).get('agent') || '/agents/field-trip';
-  const STORAGE_KEY = 'fieldtrip.conversationId';
+  const params = () => new URLSearchParams(location.search); // ?id=<conversation> (bookmarkable), ?agent=<mount path>
   const POLL_MS = 1500;
   const TIMEOUT_MS = 180000;
   const $ = (s) => document.querySelector(s);
@@ -242,19 +232,20 @@
     ['cp3', "What's the weather forecast for our trip dates?"],
     ['cp4', 'Suggest 3 venues near the city centre that fit our interests.'],
     ['cp5', 'Write the itinerary to itinerary.md and show it to me.'],
-    ['cp7', 'Book the offsite.'],
   ];
 
-  let convId = localStorage.getItem(STORAGE_KEY) || newConversationId();
+  let convId = params().get('id') || newConversationId(true);
   let messages = [];   // snapshot-shaped: { id, role, purpose, display, parts[], settlement? }
   let notices = [];    // local-only messages (errors, hints), cleared on the next send
   let lastPos = null;  // last applied stream position, for dedupe
   let busy = false;
   const openKeys = new Set(); // <details> the user expanded, preserved across re-renders
 
-  function newConversationId() {
+  // New ids go into the URL, so every conversation has a link you can save or open in another tab.
+  function newConversationId(replace) {
     const id = 'web-' + Math.random().toString(36).slice(2, 8);
-    localStorage.setItem(STORAGE_KEY, id);
+    const p = params(); p.set('id', id);
+    history[replace ? 'replaceState' : 'pushState'](null, '', `?${p}`);
     return id;
   }
   const convUrl = () => `${AGENT_PATH}/${encodeURIComponent(convId)}`;
@@ -531,12 +522,8 @@
   $('#input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('#composer').requestSubmit(); }
   });
-  $('#new-conv').onclick = () => { if (busy) return; convId = newConversationId(); showConversation(); };
-  $('#copy-bonus').onclick = async () => {
-    try { await navigator.clipboard.writeText($('#bonus-prompt').textContent); $('#copy-bonus').textContent = 'Copied'; }
-    catch { $('#copy-bonus').textContent = 'Select & copy'; }
-    setTimeout(() => ($('#copy-bonus').textContent = 'Copy prompt'), 1500);
-  };
+  $('#new-conv').onclick = () => { if (busy) return; convId = newConversationId(false); showConversation(); };
+  addEventListener('popstate', () => { if (busy) return; convId = params().get('id') || newConversationId(true); showConversation(); });
   $('#transcript').addEventListener('toggle', (e) => {
     const key = e.target.dataset && e.target.dataset.key;
     if (key) e.target.open ? openKeys.add(key) : openKeys.delete(key);
