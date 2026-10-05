@@ -1,12 +1,12 @@
 # cp6: Iterate + observe
 
 - **Goal:** turn on Workers Logs + Traces, redeploy, and read what the agent
-  did in the Cloudflare dashboard. Plus one iteration: attach the sandbox only
-  when it's needed, so "Hi" no longer starts a container.
+  did in the Cloudflare dashboard. Verify the on-demand workspace introduced in
+  cp5: "Hi" stays container-free; an explicit file request opens the workspace.
 - **Time:** 7 min
 - **Tag / branch:** `cp6` / `cp/6-iterate-observe`
 - **Files:** `wrangler.jsonc`, `src/tools/weather.ts` (one log line),
-  `src/agents/field-trip.ts` (lazy sandbox).
+  `src/agents/field-trip.ts` (check the workspace guard; repair older copies only).
 
 ## Concepts to explain
 
@@ -23,11 +23,11 @@
    fields become searchable (`event = forecast`). The model never sees it.
    (Flue's `log.info` in a tool's `run` context is different: it goes to the
    runtime event stream for `observe()` subscribers, not to Workers Logs.)
-5. **Iterate: lazy sandbox.** In cp5, *every* conversation started a container,
-   even for "Hi": Flue initializes the sandbox up front and checks the workspace
+5. **Verify: on-demand workspace.** An unconditional sandbox attachment starts a
+   container even for "Hi": Flue initializes it and checks the workspace
    (`exists('/workspace/AGENTS.md')`, `.agents/skills`, a directory listing) to
-   build the system prompt. Now `useSandbox` is called only once a persistent
-   `workspace` flag is true, and a tiny `open_workspace` tool flips it. Hooks may
+   build the system prompt. Starting with cp5, `useSandbox` is called only once
+   a persistent `workspace` flag is true, and a tiny `open_workspace` tool flips it. Hooks may
    be conditional: Flue swaps the environment at the next turn boundary and tells
    the model with an `[advisory] The agent's execution environment (sandbox) was replaced…`
    signal. Because the flag is persistent state, later messages re-attach the same container.
@@ -46,18 +46,33 @@
     console.log({ event: 'forecast', latitude: data.latitude, longitude: data.longitude, days: daily.time.length }); // cp6: Workers Logs
 ```
 
-`src/agents/field-trip.ts`: replace the `useSandbox(...)` line with:
+`src/agents/field-trip.ts`: **skip this replacement if `open_workspace` and the
+`if (workspace)` guard are already present**. Corrected cp5 and completed cp6
+include the guard. If building from an older cp5 copy, replace its unconditional
+`useSandbox(...)` line with the block below; do not register a duplicate tool or
+persistent-state key.
 
 ```ts
   const [workspace, setWorkspace] = usePersistentState('workspace', false);
-  useTool({ name: 'open_workspace', description: 'Attach the file workspace (read/write/bash tools).', async run() { setWorkspace(true); return 'Workspace attached.'; } });
-  if (workspace) useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  useTool({
+    name: 'open_workspace',
+    description:
+      'Enable the file and shell workspace for this conversation. Call only when the user asks to create, read or edit files, or run a shell command; not for greetings, trip details, weather or venue research. File tools become available on the next model turn.',
+    async run() {
+      setWorkspace(true);
+      return 'Workspace enabled. File and shell tools are available on the next model turn.';
+    },
+  });
+  if (workspace) {
+    useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  }
 ```
 
-and start rule 5 with `if you have no \`write\` tool yet, call \`open_workspace\` first. Then`:
+In older copies, also update rule 5 so file work activates the workspace and
+ordinary chat does not:
 
 ```
-5. For an itinerary: if you have no \`write\` tool yet, call \`open_workspace\` first. Then \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
+5. Use the workspace only when the user asks for file or shell work. Do not call \`open_workspace\` for greetings, saving trip details, weather questions, venue research or an itinerary described in chat. If the user asks to create, read or edit a file, or run a shell command, and the file tools are not available, call \`open_workspace\` first; the tools appear on the next model turn. When asked to save an itinerary, \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
 ```
 
 ## Final code
@@ -265,11 +280,21 @@ export function FieldTrip({ id }: AgentProps) {
   // with its own tools, and only its final answer comes back here.
   useSubagent(venueScout);
 
-  // A Linux container per conversation (adds read/write/edit/bash/grep/glob tools),
-  // attached only once the model opens it, so "Hi" never starts a container.
+  // Workspace discovery performs container I/O, even before a file tool is used.
+  // Attach a conversation's Linux workspace only after an explicit tool call.
   const [workspace, setWorkspace] = usePersistentState('workspace', false);
-  useTool({ name: 'open_workspace', description: 'Attach the file workspace (read/write/bash tools).', async run() { setWorkspace(true); return 'Workspace attached.'; } });
-  if (workspace) useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  useTool({
+    name: 'open_workspace',
+    description:
+      'Enable the file and shell workspace for this conversation. Call only when the user asks to create, read or edit files, or run a shell command; not for greetings, trip details, weather or venue research. File tools become available on the next model turn.',
+    async run() {
+      setWorkspace(true);
+      return 'Workspace enabled. File and shell tools are available on the next model turn.';
+    },
+  });
+  if (workspace) {
+    useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  }
 
   // The agent re-renders before every model call, so these instructions
   // always reflect the latest saved brief.
@@ -286,7 +311,7 @@ Rules:
    b. Pick the 3 places that best fit the brief (skip stations, offices, hospitals, embassies, companies, events).
    c. Call \`task\` ONCE with agent \`venue-scout\` for all 3 places. The scout cannot see this conversation, so the prompt must be a complete briefing: the exact place titles, the city, the headcount, and the interests.
    d. Combine the results into a short plan, keeping the links. If you know the forecast, suggest outdoor places for dry days and indoor ones for rainy days.
-5. For an itinerary: if you have no \`write\` tool yet, call \`open_workspace\` first. Then \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
+5. Use the workspace only when the user asks for file or shell work. Do not call \`open_workspace\` for greetings, saving trip details, weather questions, venue research or an itinerary described in chat. If the user asks to create, read or edit a file, or run a shell command, and the file tools are not available, call \`open_workspace\` first; the tools appear on the next model turn. When asked to save an itinerary, \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
 6. Keep replies short: at most 120 words unless the user asks for more detail.
 
 Today is ${today}.
@@ -327,7 +352,7 @@ Then in the dashboard: **Workers & Pages → field-trip-agent → Observability*
   scout's own `chat` spans on llama-4-scout; the cp5 itinerary turn, where
   the trace shows the model re-fetching the weather it already had.
 
-Lazy sandbox (fresh id; on the live URL, or locally with `docker ps` in another terminal):
+On-demand workspace (fresh id; on the live URL, or locally with `docker ps` in another terminal):
 
 ```bash
 npm run smoke -- <url> cp6-lazy "Hi, who are you? One sentence."
@@ -339,7 +364,7 @@ npm run smoke -- <url> cp6-lazy "Show me itinerary.md again."
 Pass:
 1. "Hi" replies in a few seconds and **no container starts** (`docker ps` shows
    no `workerd-field-trip-agent-Sandbox-…` locally).
-2. The itinerary turn shows `⚙ open_workspace({}) → Workspace attached.`, then
+2. The itinerary turn shows `⚙ open_workspace({})`, then
    `⚙ write` and `⚙ read`, and the output ends with
    `[advisory] The agent's execution environment (sandbox) was replaced.`
 3. The re-read works: the same container is re-attached.
@@ -364,7 +389,9 @@ you › Show me itinerary.md again.
 ✔ completed in 7.9s
 ```
 
-In the dashboard, compare the "Hi" trace with cp5's: no `Sandbox` spans now.
+In the dashboard, compare the ordinary-chat and file-work traces. Both corrected
+cp5 and cp6 keep ordinary chat free of `Sandbox` spans. File work introduces
+those spans only after activation.
 
 `npx wrangler tail field-trip-agent` shows the short request/RPC/alarm
 invocations but **not** the response's own log lines (the response runs
@@ -373,7 +400,7 @@ detached from the invocation that starts it). Use the dashboard.
 ## What to tell the attendee
 
 "Four lines of config and you can see every model turn, token count and tool
-call your agent made, per response, in production. And one iteration: three
-lines made the sandbox lazy, because a hook can be conditional and a tool can
-flip the state that gates it. Next (cp7): what happens
+call your agent made, per response, in production. The traces also confirm cp5's
+on-demand workspace: a hook can be conditional and a tool can flip the state
+that gates it. Next (cp7): what happens
 when the deploy lands in the middle of a booking."

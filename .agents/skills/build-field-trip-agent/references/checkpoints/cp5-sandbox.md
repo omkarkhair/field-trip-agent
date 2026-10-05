@@ -1,7 +1,9 @@
 # cp5: Sandbox (Cloudflare Sandbox container) (cut line)
 
-- **Goal:** each conversation gets its own Linux container. The agent writes
-  `itinerary.md` there, reads it back, and the file is still there next message.
+- **Goal:** a conversation opens its own Linux workspace only for file or shell
+  work. The agent writes `itinerary.md` there, reads it back, and can read it on
+  the next message while the container remains awake. Ordinary chats stay
+  container-free.
 - **Time:** 5 min. **Cut line:** if the room is behind, the instructor demos it
   and attendees `git switch cp/5-sandbox`.
 - **Tag / branch:** `cp5` / `cp/5-sandbox`
@@ -23,9 +25,14 @@
    | Cloudflare Computer | SQLite in the agent's own DO, durable | ms | Paid (shell runs in a Dynamic Worker) | durable workspace, no Linux needed |
    | **Cloudflare Sandbox** (what we build) | container disk, while it's awake | seconds | Paid (Containers) | full Linux: git, node, python, real binaries |
 
-2. **One line in the agent.** `useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)))`
-   gives the model the built-in `read`, `write`, `edit`, `bash`, `grep`, `glob`
-   tools. Keying on the conversation `id` means one container per conversation.
+2. **Open the workspace on demand.** A persistent `workspace` flag starts false.
+   `open_workspace` enables it only for a user request involving files or shell
+   commands. On the next model turn, an `if (workspace)` block attaches
+   `useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)))`, giving the model
+   `read`, `write`, `edit`, `bash`, `grep`, and `glob`. Keep `env.Sandbox` and
+   `getSandbox` inside the guard. Although `getSandbox` only returns a stub,
+   Flue's workspace discovery performs container I/O before any file tool runs;
+   unconditional attachment starts a container even for "Hi".
 3. **The sandbox is a Durable Object too.** `Sandbox` is a DO class (exported
    from `src/cloudflare.ts`, binding + `v2` migration) that owns a container
    built from `./Dockerfile`.
@@ -34,8 +41,8 @@
    while the container is awake, but **not** a sleep (~10 min idle) or a
    redeploy. Show it: redeploy, then `ls /workspace` is empty but the brief is
    still there. That's cp7's theme.
-5. **Subagents share the parent's sandbox**: `venue-scout` gets the same tools
-   and files.
+5. **Subagents share an attached sandbox**: `venue-scout` can research venues
+   without one; after activation it shares the parent's tools and files.
 
 ## Diff from cp4 (paste these)
 
@@ -86,13 +93,25 @@ import { env } from 'cloudflare:workers';
 export function FieldTrip({ id }: AgentProps) {   // was: FieldTrip()
 
   // after useSubagent(venueScout):
-  useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  const [workspace, setWorkspace] = usePersistentState('workspace', false);
+  useTool({
+    name: 'open_workspace',
+    description:
+      'Enable the file and shell workspace for this conversation. Call only when the user asks to create, read or edit files, or run a shell command; not for greetings, trip details, weather or venue research. File tools become available on the next model turn.',
+    async run() {
+      setWorkspace(true);
+      return 'Workspace enabled. File and shell tools are available on the next model turn.';
+    },
+  });
+  if (workspace) {
+    useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  }
 ```
 
 and a new rule 5 in the instructions (old rule 5 becomes 6):
 
 ```
-5. For an itinerary: \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
+5. Use the workspace only when the user asks for file or shell work. Do not call \`open_workspace\` for greetings, saving trip details, weather questions, venue research or an itinerary described in chat. If the user asks to create, read or edit a file, or run a shell command, and the file tools are not available, call \`open_workspace\` first; the tools appear on the next model turn. When asked to save an itinerary, \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
 ```
 
 The "do not repeat the file" part matters: asked to echo a long file, Gemma
@@ -231,8 +250,21 @@ export function FieldTrip({ id }: AgentProps) {
   // with its own tools, and only its final answer comes back here.
   useSubagent(venueScout);
 
-  // A Linux container per conversation (adds read/write/edit/bash/grep/glob tools).
-  useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  // Workspace discovery performs container I/O, even before a file tool is used.
+  // Attach a conversation's Linux workspace only after an explicit tool call.
+  const [workspace, setWorkspace] = usePersistentState('workspace', false);
+  useTool({
+    name: 'open_workspace',
+    description:
+      'Enable the file and shell workspace for this conversation. Call only when the user asks to create, read or edit files, or run a shell command; not for greetings, trip details, weather or venue research. File tools become available on the next model turn.',
+    async run() {
+      setWorkspace(true);
+      return 'Workspace enabled. File and shell tools are available on the next model turn.';
+    },
+  });
+  if (workspace) {
+    useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  }
 
   // The agent re-renders before every model call, so these instructions
   // always reflect the latest saved brief.
@@ -249,7 +281,7 @@ Rules:
    b. Pick the 3 places that best fit the brief (skip stations, offices, hospitals, embassies, companies, events).
    c. Call \`task\` ONCE with agent \`venue-scout\` for all 3 places. The scout cannot see this conversation, so the prompt must be a complete briefing: the exact place titles, the city, the headcount, and the interests.
    d. Combine the results into a short plan, keeping the links. If you know the forecast, suggest outdoor places for dry days and indoor ones for rainy days.
-5. For an itinerary: \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
+5. Use the workspace only when the user asks for file or shell work. Do not call \`open_workspace\` for greetings, saving trip details, weather questions, venue research or an itinerary described in chat. If the user asks to create, read or edit a file, or run a shell command, and the file tools are not available, call \`open_workspace\` first; the tools appear on the next model turn. When asked to save an itinerary, \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
 6. Keep replies short: at most 120 words unless the user asks for more detail.
 
 Today is ${today}.
@@ -264,10 +296,13 @@ ${hasBrief ? JSON.stringify(brief, null, 2) : '(nothing saved yet)'}`;
 ## Verify
 
 The **first** `npm run dev` after this change builds the container image (pulls
-~200 MB; ~1 min). Use **one** conversation id: every conversation id starts
-its own container (~1.3 GB RAM locally on Apple Silicon, see troubleshooting).
+~200 MB; ~1 min). Building the image is separate from starting a conversation's
+container. Use **one** conversation id for file work: only conversations that
+call `open_workspace` start a container (~1.3 GB RAM locally on Apple Silicon,
+see troubleshooting). Watch `docker ps` in another terminal.
 
 ```bash
+npm run smoke -- http://localhost:5173 cp5-local "Hi, who are you? One sentence."
 npm run smoke -- http://localhost:5173 cp5-local "Offsite in Lisbon from <START> to <END> for 14 people, budget 400 EUR each. We like food, history and the outdoors."
 TIMEOUT_S=200 npm run smoke -- http://localhost:5173 cp5-local "Suggest 3 places for our offsite."
 TIMEOUT_S=200 npm run smoke -- http://localhost:5173 cp5-local "Write the itinerary to itinerary.md and show it to me."
@@ -275,10 +310,14 @@ npm run smoke -- http://localhost:5173 cp5-local "Show me itinerary.md again."
 ```
 
 Pass:
-1. Message 3 shows `⚙ write({"content":"# …","path":"itinerary.md"}) → Successfully wrote … bytes`,
+1. The greeting, trip brief, and venue research do not call `open_workspace` or
+   start a conversation container.
+2. The file request first shows `⚙ open_workspace({})`, then
+   `⚙ write({"content":"# …","path":"itinerary.md"}) → Successfully wrote … bytes`,
    then `⚙ read({"path":"itinerary.md"}) → # …`, then a one-sentence reply.
    (The UI's cp5 chip sends the same message; expand the `read` chip to see the file.)
-2. Message 4 shows the itinerary again: the file is still in the container.
+3. The last message shows the itinerary again: the file is still in the container.
+4. A greeting in a fresh conversation starts no additional container.
 
 Then deploy (the first deploy pushes the image: ~1–2 min, longer on slow Wi-Fi)
 and repeat on the live URL with a fresh id. Optional durability demo:
@@ -291,7 +330,11 @@ npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp5-live "Use 
 Pass: `ls` shows an empty `/workspace` (file gone with the old container), and
 the headcount is still right (state lives in the agent's DO).
 
-### Sample passing output (reference build)
+### Sample file-operation output (reference build)
+
+The following reference excerpt shows the file operations. With on-demand
+activation, an `open_workspace` call must precede these operations, as checked
+above.
 
 ```
 you › Write the itinerary to itinerary.md and show it to me.
@@ -313,12 +356,13 @@ Your headcount is 10.
 
 Reference timings: itinerary turn 35 s live, 61 s local (when the model re-fetches
 the forecast); a re-read ~8 s. Container cold start adds a few seconds to the
-first message of a conversation.
+first workspace activation, not to the first ordinary message of a conversation.
 
 ## What to tell the attendee
 
-"One line gave your agent a real Linux machine per conversation: it wrote a
-file, read it back, and could run any shell command. The container is itself
+"Your agent opened a real Linux workspace only when asked to work with a file:
+it wrote the file, read it back, and could run shell commands. Ordinary chat did
+not start a container. The container is itself
 a Durable Object. Notice what survived the redeploy: not the file, but the
 brief, because state lives in the agent's Durable Object. Next (cp6): change
 behaviour, redeploy, and watch it in traces."

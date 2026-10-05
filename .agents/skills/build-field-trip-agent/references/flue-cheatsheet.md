@@ -188,12 +188,25 @@ Full verified code: `checkpoints/cp4-subagent.md`.
 The workshop uses a **Cloudflare Sandbox container** (cp5; full code in `checkpoints/cp5-sandbox.md`):
 
 ```ts
+import { usePersistentState, useSandbox, useTool } from '@flue/runtime';
 import { cloudflareSandbox } from '@flue/runtime/cloudflare';
 import { getSandbox } from '@cloudflare/sandbox';     // pin 0.12.10 (NOT 1.x)
 import { env } from 'cloudflare:workers';
 
-export function FieldTrip({ id }: AgentProps) {
-  useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));   // one container per conversation
+// Inside FieldTrip({ id }: AgentProps), after useSubagent(venueScout):
+const [workspace, setWorkspace] = usePersistentState('workspace', false);
+useTool({
+  name: 'open_workspace',
+  description:
+    'Enable the file and shell workspace for this conversation. Call only when the user asks to create, read or edit files, or run a shell command; not for greetings, trip details, weather or venue research. File tools become available on the next model turn.',
+  async run() {
+    setWorkspace(true);
+    return 'Workspace enabled. File and shell tools are available on the next model turn.';
+  },
+});
+if (workspace) {
+  useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+}
 ```
 
 Plus: `src/cloudflare.ts` (`export { Sandbox } from '@cloudflare/sandbox'`), a
@@ -203,10 +216,12 @@ migration, and `containers: [{ class_name, image: "./Dockerfile", max_instances 
 
 - Adds built-in tools `read`, `write`, `edit`, `bash`, `grep`, `glob` (cwd `/workspace`).
 - At most once per render; the factory is lazy (built once per initialization).
-  Initialization touches the sandbox (workspace discovery), so **every
-  conversation starts a container**, even if it never uses a file tool. cp6 fixes that
-  by gating it: `if (workspace) useSandbox(...)`, with a tool that sets the persistent
-  `workspace` flag. Flue swaps the environment at the next turn boundary (`environment` signal).
+  Initialization touches the sandbox (workspace discovery), so **unconditional
+  attachment starts a container even without a file request**. Starting in cp5,
+  keep the whole binding/adapter expression inside `if (workspace)`. Only
+  `open_workspace` enables the persistent flag, for explicit file or shell work.
+  Flue swaps the environment at the next turn boundary (`environment` signal).
+  The agent's instructions must preserve this activation policy as well.
 - Container files survive while it's awake; a sleep or redeploy wipes them.
   Durable facts go in `usePersistentState`.
 - `@cloudflare/sandbox` 1.x changed `exec()` to return a process handle; Flue

@@ -218,9 +218,10 @@ Docker Desktop/OrbStack and restart `npm run dev`. The first build pulls
 **`SandboxDiedError: Sandbox exists failed: the sandbox stopped while the call was in flight`**
 **/ `Container exited with unexpected exit code: 137`** (local)
 → Docker ran out of memory and killed the container. On Apple Silicon the amd64
-image runs emulated at ~1.3 GB per container, and **every conversation id
-starts its own container**. Fix: raise Docker memory to ≥ 4 GB, reuse one
-conversation id, and clear old containers:
+image runs emulated at ~1.3 GB per container, and **each conversation that opens
+its workspace gets its own container**. Ordinary chat should not start one.
+Fix: raise Docker memory to ≥ 4 GB, reuse one conversation id for file work,
+and clear old containers:
 `docker ps -q --filter name=workerd-field-trip-agent | xargs docker rm -f`.
 A single 137 during a cold start can retry on its own; repeated ones are memory.
 
@@ -259,9 +260,12 @@ Not a wrangler login problem.
 slept. The brief survives because it's state in the agent's DO. That's the
 point of the demo.
 
-**The first message of a new conversation is a few seconds slower**
-→ Container cold start. In cp5 every conversation starts its container on the
-first message; cp6 makes it lazy (only when the itinerary needs files).
+**The first file or shell request is a few seconds slower**
+→ Container cold start after `open_workspace`. Starting in cp5, greetings,
+brief updates, weather, and venue research do not attach a workspace. If a fresh
+ordinary chat starts a container, check that the entire `getSandbox` /
+`cloudflareSandbox` / `useSandbox` expression is inside `if (workspace)` and that
+the tool description and instructions restrict activation to file or shell work.
 
 ## cp6
 
@@ -275,16 +279,19 @@ Ingestion takes a minute or two. Look under the agent's Durable Object
 runs detached from them. Use the dashboard's Logs view.
 
 **`[advisory] The agent's execution environment (sandbox) was replaced.` in the output**
-→ Expected (cp6+): `open_workspace` flipped the `workspace` flag and Flue attached
+→ Expected (cp5+): `open_workspace` flipped the `workspace` flag and Flue attached
 the sandbox at the next turn boundary. It appears once per conversation.
 
-**The model writes the itinerary as text, or says it has no `write` tool**
-→ It skipped `open_workspace`. Check rule 5 starts with "if you have no `write`
-tool yet, call `open_workspace` first", and resend.
+**The model ignores a request to save the itinerary, or says it has no `write` tool**
+→ It skipped `open_workspace`. Check rule 5 tells it to call `open_workspace`
+before file or shell work when those tools are unavailable, then resend an
+explicit file request. An itinerary requested only in chat need not open a workspace.
 
-**"Hi" still starts a container (cp6+)**
+**"Hi" still starts a container (cp5+)**
 → That conversation already opened the workspace: the flag is persistent state,
-so every later message re-attaches. Use a fresh conversation id.
+so every later message re-attaches. Use a fresh conversation id. If that fresh
+conversation also starts a container, repair the workspace guard as described
+under cp5 above; greetings must not call `open_workspace`.
 
 **`log.info(...)` in a tool shows nothing anywhere**
 → Flue's tool `log` goes to the runtime event stream (`observe()` subscribers),
