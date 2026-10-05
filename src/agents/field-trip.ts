@@ -60,8 +60,21 @@ export function FieldTrip({ id }: AgentProps) {
   // with its own tools, and only its final answer comes back here.
   useSubagent(venueScout);
 
-  // A Linux container per conversation (adds read/write/edit/bash/grep/glob tools).
-  useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  // Workspace discovery performs container I/O, even before a file tool is used.
+  // Attach a conversation's Linux workspace only after an explicit tool call.
+  const [workspace, setWorkspace] = usePersistentState('workspace', false);
+  useTool({
+    name: 'open_workspace',
+    description:
+      'Enable the file and shell workspace for this conversation. Call only when the user asks to create, read or edit files, or run a shell command; not for greetings, trip details, weather or venue research. File tools become available on the next model turn.',
+    async run() {
+      setWorkspace(true);
+      return 'Workspace enabled. File and shell tools are available on the next model turn.';
+    },
+  });
+  if (workspace) {
+    useSandbox(cloudflareSandbox(getSandbox(env.Sandbox, id)));
+  }
 
   // The agent re-renders before every model call, so these instructions
   // always reflect the latest saved brief.
@@ -78,7 +91,7 @@ Rules:
    b. Pick the 3 places that best fit the brief (skip stations, offices, hospitals, embassies, companies, events).
    c. Call \`task\` ONCE with agent \`venue-scout\` for all 3 places. The scout cannot see this conversation, so the prompt must be a complete briefing: the exact place titles, the city, the headcount, and the interests.
    d. Combine the results into a short plan, keeping the links. If you know the forecast, suggest outdoor places for dry days and indoor ones for rainy days.
-5. For an itinerary: \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
+5. Use the workspace only when the user asks for file or shell work. Do not call \`open_workspace\` for greetings, saving trip details, weather questions, venue research or an itinerary described in chat. If the user asks to create, read or edit a file, or run a shell command, and the file tools are not available, call \`open_workspace\` first; the tools appear on the next model turn. When asked to save an itinerary, \`write\` it to itinerary.md (one section per day: places, timing, weather), then \`read\` it to check. Do not repeat the file in your reply (the user sees the read result); reply in one sentence.
 6. Keep replies short: at most 120 words unless the user asks for more detail.
 
 Today is ${today}.

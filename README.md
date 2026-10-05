@@ -103,7 +103,7 @@ catch up.
 | `cp2` | **Hooks + persistent state** | `usePersistentState('brief')` + a `save_trip_brief` tool | a second message remembers your headcount |
 | `cp3` | **Tools calling external APIs** | `geocode_city`, `get_forecast` (Open-Meteo) | a weather question shows tool calls in the conversation |
 | `cp4` | **Sub-agent delegation** | Wikipedia tools; a `venue-scout` sub-agent with its own tool and model | the parent finds places, calls `task`, and combines the scout's assessment with the weather |
-| `cp5` | **Sandbox** | a virtual `just-bash` sandbox | the agent writes and returns `itinerary.md` |
+| `cp5` | **Sandbox** | an on-demand Cloudflare Sandbox workspace per conversation | ordinary chat starts no container; a file request opens the workspace, writes `itinerary.md`, and reads it back |
 | `cp6` | **Iterate + observe** | change behavior, redeploy, turn on traces | new behavior live; traces in the Cloudflare dashboard |
 | `cp7` | **Durability** *(stretch)* | a `durable: true` booking tool using `step.do` | a redeploy mid-booking still books exactly once |
 
