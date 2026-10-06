@@ -1,0 +1,19 @@
+package-lock.json
+  s_b1f7548f60e16e::t_d4b5a3a62b94b9 12-13,20-21,1518-1520,1524-1525,1542-1544,1552,1562-1564,1568,2772-2774,2955,2972,2989,3006,3023,3040,3057,3074,3091,3108,3125,3142,3159,3176,3193,3210,3227,3244,3261,3278,4342,4858-4860,5016,5280-5282,5862,5891,6519,6676,6966
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "8acb3b34391a37754816f7f0bed7d8c452d2192f",
+  "prompts": {},
+  "sessions": {
+    "s_b1f7548f60e16e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_eedc42bbeffeZCfQNicgcEBx2q",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Stephane Nouvellon <stephane@cloudflare.com>"
+    }
+  }
+}
