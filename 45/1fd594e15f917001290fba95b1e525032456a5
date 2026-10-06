@@ -1,0 +1,23 @@
+.agents/skills/build-field-trip-agent/references/checkpoints/cp6-iterate-observe.md
+  s_2c7aaccb31ed20::t_4ffaa3f9b17000 3-218
+.agents/skills/build-field-trip-agent/references/deploy.md
+  s_2c7aaccb31ed20::t_fe833979241e35 98-101
+.agents/skills/build-field-trip-agent/references/troubleshooting.md
+  s_2c7aaccb31ed20::t_effb9138b3e6e6 256-278
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "451fd594e15f917001290fba95b1e525032456a5",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+.agents/skills/build-field-trip-agent/SKILL.md
+  s_2c7aaccb31ed20::t_c3a6b060d0efff 78-80
+.agents/skills/build-field-trip-agent/references/checkpoints/cp2-hooks-state.md
+  s_2c7aaccb31ed20::t_a6954226580252 167-168
+.agents/skills/build-field-trip-agent/references/troubleshooting.md
+  s_2c7aaccb31ed20::t_0982c902b29207 48-51
+README.md
+  s_2c7aaccb31ed20::t_d59c9efeb6c08c 142-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "cf89ee18bfd6d240334d77fb29290fc7242a586e",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}

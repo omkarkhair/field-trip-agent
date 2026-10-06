@@ -1,0 +1,19 @@
+src/ui/index.html
+  s_2c7aaccb31ed20::t_fc0f899b86faf6 220,237,244-245,247-248,525-526
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "483dcc03c9b7c68dde77fe05d8c1d8b4c6abc227",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}

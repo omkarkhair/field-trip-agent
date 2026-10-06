@@ -1,0 +1,19 @@
+src/agents/field-trip.ts
+  s_2c7aaccb31ed20::t_e560f7f9de3208 63-67,84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d870582d7feaf25da04b811a68d40e4b93506e86",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}

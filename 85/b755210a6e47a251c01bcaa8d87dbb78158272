@@ -1,0 +1,21 @@
+src/tools/weather.ts
+  s_2c7aaccb31ed20::t_c097150c230168 84
+wrangler.jsonc
+  s_2c7aaccb31ed20::t_827a7aacff5520 29-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "85b755210a6e47a251c01bcaa8d87dbb78158272",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}
