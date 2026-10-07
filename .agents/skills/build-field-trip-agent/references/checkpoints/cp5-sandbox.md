@@ -3,8 +3,8 @@
 - **Goal:** each conversation gets its own Linux container. The agent writes
   `itinerary.md` there, reads it back, and the file is still there next message.
 - **Time:** 5 min. **Cut line:** if the room is behind, the instructor demos it
-  and attendees recover to `fix/flue-2.0.0-cp5`.
-- **Branch:** `fix/flue-2.0.0-cp5`
+  and attendees recover to `cp/5-sandbox`.
+- **Branch:** `cp/5-sandbox`
 - **Needs:** an account with **Containers** enabled (workshop accounts have it;
   it's a Workers Paid feature) and **Docker running** for `npm run dev` and
   `npm run deploy`. See `prework.md`.
