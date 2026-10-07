@@ -106,6 +106,38 @@ test('a timeout after 202 reports that the POST was accepted', async (t) => {
   assert.match(result.stderr, /It was accepted/);
 });
 
+test('a reset POST connection is treated as an ambiguous submission', async (t) => {
+  let requests = 0;
+  const { server, baseUrl } = await listen((req) => {
+    requests++;
+    req.resume();
+    req.on('end', () => req.socket.destroy());
+  });
+  t.after(() => server.close());
+
+  const result = await runSmoke(baseUrl, ['hello']);
+  assert.equal(result.code, 1);
+  assert.equal(requests, 1);
+  assert.match(result.stderr, /It may have been accepted/);
+});
+
+test('a refused POST connection retains the dev-server diagnostic', async () => {
+  const { server, baseUrl } = await listen(() => {});
+  await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+
+  const result = await runSmoke(baseUrl, ['hello']);
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /Is the dev server running/);
+  assert.doesNotMatch(result.stderr, /may have been accepted/i);
+});
+
+test('an invalid URL is not reported as an accepted submission', async () => {
+  const result = await runSmoke('not-a-url', ['hello']);
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /Failed to parse URL/);
+  assert.doesNotMatch(result.stderr, /may have been accepted/i);
+});
+
 test('TIMEOUT_S is a hard reply deadline', async (t) => {
   const { server, baseUrl } = await listen((_req, res) => {
     res.writeHead(202, { 'content-type': 'application/json' });
