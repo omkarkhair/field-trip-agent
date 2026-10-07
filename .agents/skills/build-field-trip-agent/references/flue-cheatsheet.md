@@ -1,4 +1,4 @@
-# Flue 2.1.1 cheatsheet (Cloudflare target)
+# Flue 2.0.0 cheatsheet (Cloudflare target)
 
 Verified against the installed packages. For anything not covered here, use the
 bundled docs, which match the installed version:
@@ -210,7 +210,7 @@ migration, and `containers: [{ class_name, image: "./Dockerfile", max_instances 
 - Container files survive while it's awake; a sleep or redeploy wipes them.
   Durable facts go in `usePersistentState`.
 - `@cloudflare/sandbox` 1.x changed `exec()` to return a process handle; Flue
-  2.1.1's `cloudflareSandbox()` expects the 0.x API, so stay on 0.12.x.
+  Flue 2.0's `cloudflareSandbox()` expects the 0.x API, so stay on 0.12.x.
 
 | Strategy | Start | FS | Plan | Use for |
 |---|---|---|---|---|
@@ -297,7 +297,7 @@ tool call:
 Prompt changes can't fix either.
 
 **Gemma and `thinkingLevel`:** Gemma 4 has no reasoning-effort levels. Thinking
-can only be toggled with `chat_template_kwargs.enable_thinking`, which Flue 2.1.1
+can only be toggled with `chat_template_kwargs.enable_thinking`, which Flue 2.0.0
 doesn't send, so `thinkingLevel` has no effect on it. Don't set it.
 
 **Subagent model (cp4):** `venue-scout` runs on `llama-4-scout`. Its weakness

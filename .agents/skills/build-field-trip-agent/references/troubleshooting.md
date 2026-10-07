@@ -7,7 +7,7 @@ Format: **symptom** → cause → fix. Newest checkpoint last.
 
 **`vite dev` fails: "The Cloudflare plugin is not receiving Flue's Worker configuration"**
 → The flueframework.com example shows `cloudflare()` with no arguments, but Flue
-2.1.1 requires the config customizer.
+2.0.0 requires the config customizer.
 → Fix `vite.config.ts`:
 ```ts
 import { flue, flueWorkerConfig } from '@flue/vite';
@@ -34,6 +34,11 @@ account).
 without that export.
 → Fixed in `scripts/check.mjs` (reads `node_modules/<pkg>/package.json`
 directly). Pull the latest `main` if you see this.
+
+**`npm run check` → "Dependency mismatch … @flue/runtime (have 2.1.1, want 2.0.0)"**
+→ You installed before the Flue pin moved to 2.0.0 (it was 2.1.1 until Oct 7).
+`git pull`, then `npm install`. Don't "fix" it the other way by upgrading Flue:
+2.0.0 is on purpose (see the cp6 entry on traces).
 
 **Chat UI (`http://localhost:5173`) says "No agent is mounted … checkpoint 1"**
 → Expected at cp0. POST to `/agents/field-trip/:id` returns 404 until cp1
@@ -230,7 +235,7 @@ say "Do not repeat the file in your reply … reply in one sentence". The user
 sees the file through the `read` result.
 
 **`exec` errors like `sandbox.exec(...).then is not a function` / stdout undefined after `npm install`**
-→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.1.1 needs
+→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.0.0 needs
 0.x: `npm install --save-exact @cloudflare/sandbox@0.12.10` and keep the
 Dockerfile tag the same.
 
@@ -269,6 +274,13 @@ first message; cp6 makes it lazy (only when the itinerary needs files).
 → Check `wrangler.jsonc` has the `observability` block and that you redeployed.
 Ingestion takes a minute or two. Look under the agent's Durable Object
 (`FlueFieldTripAgent`), not the POST request: each response runs as its own unit of work.
+
+**A trace has `invoke_agent` with a single short `chat` span and no `execute_tool` spans**
+→ Flue 2.1.x was installed. Its trace tree stops after the first model call (local
+test: 1.5 s `invoke_agent` for a 21 s turn with 3 tool calls). This project pins
+**2.0.0**, which traces every `chat` and `execute_tool`, plus the `venue-scout` subagent
+nested under the parent's `task`. Check `package.json` says 2.0.0, run `npm install`,
+redeploy. Locally you can see the tree with the `spans` query in [deploy.md](deploy.md).
 
 **`npx wrangler tail` doesn't show the `forecast` log**
 → Expected: tail sees the short request/RPC/alarm invocations, but the response

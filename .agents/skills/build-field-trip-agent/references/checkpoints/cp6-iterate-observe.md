@@ -323,8 +323,9 @@ Then in the dashboard: **Workers & Pages → field-trip-agent → Observability*
   `invoke_agent FieldTrip` → `chat @cf/google/gemma-4-26b-a4b-it` (token usage) →
   `execute_tool geocode_city` / `get_forecast` → the outbound `fetch` to Open-Meteo.
 - **Logs / Events:** filter `event = forecast` to find the log line.
-- **Things worth pointing at:** the `task` span for `venue-scout` (cp4) and the
-  scout's own `chat` spans on llama-4-scout; the cp5 itinerary turn, where
+- **Things worth pointing at:** the suggestion turn (cp4), where
+  `invoke_agent venue-scout` is nested inside the parent's turn with its own
+  llama-4-scout `chat` spans and 3× `execute_tool get_place_summary`; the cp5 itinerary turn, where
   the trace shows the model re-fetching the weather it already had.
 
 Lazy sandbox (fresh id; on the live URL, or locally with `docker ps` in another terminal):
