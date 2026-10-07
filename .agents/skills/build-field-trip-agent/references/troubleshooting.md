@@ -7,7 +7,7 @@ Format: **symptom** → cause → fix. Newest checkpoint last.
 
 **`vite dev` fails: "The Cloudflare plugin is not receiving Flue's Worker configuration"**
 → The flueframework.com example shows `cloudflare()` with no arguments, but Flue
-2.1.1 requires the config customizer.
+2.0.0 requires the config customizer.
 → Fix `vite.config.ts`:
 ```ts
 import { flue, flueWorkerConfig } from '@flue/vite';
@@ -45,8 +45,10 @@ or a dropped connection), and the UI fell back to polling the snapshot every
 1.5 s. Replies still arrive, just all at once. No action needed.
 
 **Chat UI shows an old conversation / you want a clean slate**
-→ Click **New conversation**. The id is kept in `localStorage`
-(`fieldtrip.conversationId`) and is independent of the ids you use with `npm run smoke`.
+→ Click **New conversation**. The id lives in the URL (`/?id=web-xxxxxx`): bookmark
+it, open several tabs with different ids, or open a smoke conversation with
+`/?id=<smoke-id>`. Older checkpoint tags still keep the id in `localStorage`
+and may show extra checkpoint cards; ignore those.
 
 **Fonts look plain in the UI**
 → Space Grotesk / JetBrains Mono load from Google Fonts. Offline, the UI falls
@@ -167,7 +169,7 @@ roughly 4–5 s each. The chat UI shows each `⚙` chip as it happens.
 ## cp4
 
 **`Timed out after 180s` on the suggestion turn**
-→ Run it with `TIMEOUT_S=200`. The work keeps going after a timeout, so
+→ The work keeps going after a timeout. Do not immediately send the prompt again:
 re-run `npm run smoke -- <url> <id>` (no message) to read the result. If turns
 regularly exceed ~60 s, check that the parent sends **one** `task` (rule 4c)
 and that the scout has `model: '…llama-4-scout…'`. On Gemma, the scout takes
@@ -205,6 +207,96 @@ this out as *why* the model, not code, picks the places.
 **`Error: useModel() … cannot be called inside a subagent`** (or `useSandbox` / `usePersistentState`)
 → Subagents can't use instance hooks. Set `model` on the `defineSubagent`
 definition instead.
+
+## cp5
+
+**`npm run dev` hangs on "Building container images…" or fails with a Docker error**
+→ Docker isn't running (`docker info` must print a server version). Start
+Docker Desktop/OrbStack and restart `npm run dev`. The first build pulls
+~200 MB; pre-pull with `docker pull --platform linux/amd64 docker.io/cloudflare/sandbox:0.12.10`.
+
+**`SandboxDiedError: Sandbox exists failed: the sandbox stopped while the call was in flight`**
+**/ `Container exited with unexpected exit code: 137`** (local)
+→ Docker ran out of memory and killed the container. On Apple Silicon the amd64
+image runs emulated at ~1.3 GB per container, and **every conversation id
+starts its own container**. Fix: raise Docker memory to ≥ 4 GB, reuse one
+conversation id, and clear old containers:
+`docker ps -q --filter name=workerd-field-trip-agent | xargs docker rm -f`.
+A single 137 during a cold start can retry on its own; repeated ones are memory.
+
+**The itinerary turn times out; the reasoning ends in `most, most, most, …`**
+→ Gemma fell into a repetition loop while echoing the file back. Rule 5 must
+say "Do not repeat the file in your reply … reply in one sentence". The user
+sees the file through the `read` result.
+
+**`exec` errors like `sandbox.exec(...).then is not a function` / stdout undefined after `npm install`**
+→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.0.0 needs
+0.x: `npm install --save-exact @cloudflare/sandbox@0.12.10` and keep the
+Dockerfile tag the same.
+
+**Container errors after changing the package version**
+→ The `Dockerfile` tag must equal the `@cloudflare/sandbox` version in
+`package.json` (`0.12.10` ↔ `cloudflare/sandbox:0.12.10`). Restart `npm run dev`
+to rebuild the image.
+
+**`Cannot find module 'cloudflare:workers'` in `npm run typecheck`**
+→ Add the `declare module 'cloudflare:workers'` block to `src/env.d.ts`. The build
+works without it; only the typechecker needs it.
+
+**`npm run deploy` ends with `Login failed with code: 1` after `lookup registry.cloudflare.com … no such host`**
+→ Docker's VM lost DNS (common on flaky Wi-Fi). The Worker itself **was** uploaded
+(`Uploaded field-trip-agent`), only the image push step failed; if the `Dockerfile`
+didn't change, the old image keeps working. Check with
+`docker run --rm alpine nslookup registry.cloudflare.com`, then re-run `npm run deploy`.
+Not a wrangler login problem.
+
+**Deploy fails mentioning containers / not entitled / `max_instances`**
+→ The account doesn't have Containers enabled. Use the workshop account
+(`npx wrangler whoami` shows which one you're on), or Workers Paid.
+
+**`itinerary.md` is gone**
+→ Expected after a redeploy or ~10 min idle: the container was replaced or
+slept. The brief survives because it's state in the agent's DO. That's the
+point of the demo.
+
+**The first message of a new conversation is a few seconds slower**
+→ Container cold start. In cp5 every conversation starts its container on the
+first message; cp6 makes it lazy (only when the itinerary needs files).
+
+## cp6
+
+**No traces / logs in the dashboard**
+→ Check `wrangler.jsonc` has the `observability` block and that you redeployed.
+Ingestion takes a minute or two. Look under the agent's Durable Object
+(`FlueFieldTripAgent`), not the POST request: each response runs as its own unit of work.
+
+**`npx wrangler tail` doesn't show the `forecast` log**
+→ Expected: tail sees the short request/RPC/alarm invocations, but the response
+runs detached from them. Use the dashboard's Logs view.
+
+**`[advisory] The agent's execution environment (sandbox) was replaced.` in the output**
+→ Expected (cp6+): `open_workspace` flipped the `workspace` flag and Flue attached
+the sandbox at the next turn boundary. It appears once per conversation.
+
+**The model writes the itinerary as text, or says it has no `write` tool**
+→ It skipped `open_workspace`. Check rule 5 starts with "if you have no `write`
+tool yet, call `open_workspace` first", and resend.
+
+**"Hi" still starts a container (cp6+)**
+→ That conversation already opened the workspace: the flag is persistent state,
+so every later message re-attaches. Use a fresh conversation id.
+
+**`log.info(...)` in a tool shows nothing anywhere**
+→ Flue's tool `log` goes to the runtime event stream (`observe()` subscribers),
+not to Workers Logs. Use `console.log({...})` for Workers Logs.
+
+**The first message right after `npm run deploy` fails with `SandboxDiedError`**
+→ The container was being replaced by the deploy. Resend the message; it works
+once the new container is up (seen once, ~30 s after deploy).
+
+**Local: `SandboxDiedError` keeps repeating after you `docker rm`-ed containers**
+→ Don't remove containers under a running `npm run dev`: the local Sandbox DO
+keeps retrying the vanished one. Stop the dev server, then clear containers, then restart.
 
 ## Known in advance (from the Flue docs)
 
