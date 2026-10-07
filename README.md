@@ -5,8 +5,10 @@ on **Cloudflare Workers**, backed by **Durable Objects** for persistence and rec
 
 By the end of this session you will have a live agent on your own `*.workers.dev`
 URL that plans a team offsite: it remembers the trip brief, checks the weather,
-delegates venue research to a sub-agent, writes an itinerary, and books the trip
-through a durable tool that survives a redeploy.
+delegates venue research to a sub-agent, writes an itinerary, and exposes each
+model and tool call through production traces.
+
+**Try the live demo:** <https://field-trip-agent.omkk.workers.dev/>
 
 > **Using a coding agent** (OpenCode, Claude Code, Cursor, ...)? Point it at this
 > README and the skill in [`.agents/skills/build-field-trip-agent/`](.agents/skills/build-field-trip-agent/SKILL.md).
@@ -21,10 +23,10 @@ through a durable tool that survives a redeploy.
 | Creating an agent | An agent *is* a function that returns its instructions, marked with `'use agent'` |
 | The Flue hook model | `useModel`, `usePersistentState`, `useTool`, `useSubagent`, `useSandbox` — the agent re-renders before every model call |
 | Tools that call external APIs | `defineTool` + [valibot](https://valibot.dev) schemas → Open-Meteo and Wikipedia |
-| Sub-agent delegation | A `venue-scout` sub-agent with its own tools and a fresh context |
-| Sandbox strategies | No sandbox → in-memory virtual sandbox → Cloudflare container |
+| Sub-agent delegation | A `venue-scout` sub-agent with its own tool, its own model, and a fresh context |
+| Sandbox strategies | No sandbox → in-memory virtual sandbox → Cloudflare Computer → Cloudflare Sandbox container (built) |
 | Deploy, test, iterate | `vite dev` → `wrangler deploy` → test live → read traces |
-| Durable Objects | One Durable Object per conversation; persistent state; durable tool steps that replay after a crash |
+| Durable Objects | One Durable Object per conversation with persistent, isolated state |
 
 ---
 
@@ -32,8 +34,8 @@ through a durable tool that survives a redeploy.
 
 Please do this **before** you arrive — conference Wi-Fi is not your friend.
 
-1. **Install Node.js 22.19 or newer** — `node --version`
-2. **Have a Cloudflare account** (free plan is fine; the workshop model runs on it) with a `workers.dev`
+1. **Install Node.js 22.19+ LTS or 24.11+** — `node --version` (Node 23 is unsupported)
+2. **Have a Cloudflare account** (use the workshop account you were given; it has Containers enabled for cp5) with a `workers.dev`
    subdomain. If you've never deployed a Worker, open
    **Workers & Pages** in the [dashboard](https://dash.cloudflare.com) once so the
    subdomain gets created.
@@ -41,29 +43,38 @@ Please do this **before** you arrive — conference Wi-Fi is not your friend.
    ```bash
    git clone <repo-url> field-trip-agent
    cd field-trip-agent
-   npm install
+   npm ci
    ```
-4. **Log in to Cloudflare:**
+4. **Install and start Docker** (Docker Desktop or OrbStack; needed from cp5). On Apple Silicon, give it ≥ 4 GB of memory, then pre-pull the sandbox image:
+   ```bash
+   docker pull --platform linux/amd64 docker.io/cloudflare/sandbox:0.12.10
+   ```
+5. **Log in to Cloudflare:**
    ```bash
    npx wrangler login
    ```
-5. **Check everything:**
+6. **Check everything:**
    ```bash
    npm run check
    ```
    All lines should be green. If not, see [Troubleshooting](#troubleshooting).
-6. **Smoke test the dev server:**
+7. **Smoke test the dev server:**
    ```bash
    npm run dev
    # in another terminal
    curl http://localhost:5173/api/ping      # → pong
    ```
-7. **Open the chat UI** at <http://localhost:5173>. Until checkpoint 1 it tells
+8. **Open the chat UI** at <http://localhost:5173>. Until checkpoint 1 it tells
    you no agent is mounted yet. That's expected.
 
 **No model API keys are needed.** The agent uses
 [Workers AI](https://developers.cloudflare.com/workers-ai/) through the Worker's
 `AI` binding, and every external API we call is free and keyless.
+
+The pinned install may report audit findings in transitive workshop dependencies.
+Do not run `npm audit fix` during the lab: it changes the checkpoint-verified
+dependency graph. The deployed `workers.dev` URL is public and billable, so use
+only synthetic prompts and never paste credentials or customer data.
 
 ---
 
@@ -73,10 +84,10 @@ You tell it about an offsite — **city, dates, headcount, budget, interests** �
 
 1. Saves the **trip brief** and remembers it across messages.
 2. Checks the **weather** for your dates.
-3. Asks its **`venue-scout`** sub-agent to research venues nearby.
+3. Finds places nearby and asks its **`venue-scout`** sub-agent to assess them
+   (activities, visit length, weather dependency), then matches them to the forecast.
 4. Writes an **itinerary** to `itinerary.md` in its sandbox.
-5. *(stretch)* **Books** the offsite through a mock booking API — exactly once,
-   even if the Worker is redeployed mid-booking.
+5. Opens **production traces** to inspect model latency, token use, and tool calls.
 
 ### External APIs (free, no keys)
 
@@ -85,13 +96,12 @@ You tell it about an offsite — **city, dates, headcount, budget, interests** �
 | [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) | city → latitude/longitude |
 | [Open-Meteo Forecast](https://open-meteo.com/en/docs) | daily forecast, up to 16 days ahead |
 | [Wikipedia API](https://www.mediawiki.org/wiki/API:Geosearch) | places near a location + summaries |
-| Mock booking API | an in-process fake with latency and random failures (`src/shared/mock-booking-api.ts`) |
 
 ---
 
 ## Checkpoints
 
-The session is split into checkpoints. Each one is a **git tag** (`cp1`…`cp7`)
+The session is split into checkpoints. Each one is a **git tag** (`cp1`…`cp6`)
 and a **branch** (`cp/1-hello-agent`…) with working code, so you can always
 catch up.
 
@@ -101,10 +111,9 @@ catch up.
 | `cp1` | **Hello agent + first deploy** | `src/agents/field-trip.ts`, mount it in `src/app.ts`, add a Durable Object migration | agent replies locally **and** on your `workers.dev` URL |
 | `cp2` | **Hooks + persistent state** | `usePersistentState('brief')` + a `save_trip_brief` tool | a second message remembers your headcount |
 | `cp3` | **Tools calling external APIs** | `geocode_city`, `get_forecast` (Open-Meteo) | a weather question shows tool calls in the conversation |
-| `cp4` | **Sub-agent delegation** | `venue-scout` sub-agent with Wikipedia tools | the parent calls `task` and gets a venue shortlist back |
-| `cp5` | **Sandbox** | a virtual `just-bash` sandbox | the agent writes and returns `itinerary.md` |
+| `cp4` | **Sub-agent delegation** | Wikipedia tools; a `venue-scout` sub-agent with its own tool and model | the parent finds places, calls `task`, and combines the scout's assessment with the weather |
+| `cp5` | **Sandbox** | a Cloudflare Sandbox container per conversation | the agent writes `itinerary.md` and reads it back |
 | `cp6` | **Iterate + observe** | change behavior, redeploy, turn on traces | new behavior live; traces in the Cloudflare dashboard |
-| `cp7` | **Durability** *(stretch)* | a `durable: true` booking tool using `step.do` | a redeploy mid-booking still books exactly once |
 
 ### Fell behind? Catch up in one command
 
@@ -112,7 +121,7 @@ catch up.
 git stash                      # keep your work, if you want it
 git fetch --all --tags
 git switch -c my-cp3 cp3       # start from any checkpoint tag
-npm install                    # later checkpoints may add dependencies
+npm ci                         # later checkpoints may add dependencies
 ```
 
 Then re-run that checkpoint's verify step. Or ask your coding agent: *"catch me up
@@ -130,11 +139,18 @@ to checkpoint 3"* — the skill knows how.
 | `npm run deploy` | Build and deploy to `https://field-trip-agent.<your-subdomain>.workers.dev` |
 | `npm run smoke -- <base-url> <id> "<message>"` | Send a message to the agent and print its reply |
 
+`npm run smoke` waits up to 180 seconds for the agent turn. Individual HTTP
+requests are capped at 15 seconds, and safe history reads retry transient
+failures. Override these with `TIMEOUT_S`, `REQUEST_TIMEOUT_S`, and
+`HISTORY_RETRIES` when diagnosing a slow environment.
+
 ### Talking to your agent
 
 **In the browser:** open <http://localhost:5173> (or your `workers.dev` URL). The
 chat UI streams replies live, shows every tool call as an expandable chip, and
-has example prompts for each checkpoint. **New conversation** starts a fresh
+has example prompts for each checkpoint (click one, then **Send**). The conversation
+id is in the URL (`/?id=…`): bookmark it, open several conversations in tabs, or
+open a smoke conversation with `/?id=offsite-1`. **New conversation** starts a fresh
 Durable Object.
 
 **From the terminal:**
@@ -171,9 +187,7 @@ src/
 ├── subagents/venue-scout.ts    # sub-agent (not a registered agent)
 ├── tools/
 │   ├── weather.ts              # Open-Meteo tools
-│   ├── wikipedia.ts            # Wikipedia tools
-│   └── booking.ts              # durable booking tool
-└── shared/mock-booking-api.ts  # fake booking API
+│   └── wikipedia.ts            # Wikipedia tools
 vite.config.ts                  # plugins: [flue(), cloudflare({ config: flueWorkerConfig() })]
 wrangler.jsonc                  # AI binding, Durable Object migrations, observability
 scripts/                        # check.mjs, smoke.mjs (plain Node — works on Windows too)
@@ -193,7 +207,9 @@ scripts/                        # check.mjs, smoke.mjs (plain Node — works on 
 | Deploy fails with a Durable Object / migration error | Every agent needs a `new_sqlite_classes` migration in `wrangler.jsonc` — see cp1 |
 | `cloudflare/...` model errors under `flue run` | Workers AI models only run under `npm run dev` or deployed — not `flue run` |
 | POST returns `202` but no reply yet | Replies are async — poll `GET .../<id>?view=history` or use `npm run smoke` |
-| Files the agent wrote are gone | The virtual sandbox is in-memory and rebuilt per message; persistent state is what survives |
+| Smoke POST times out | The submission may have been accepted; re-run smoke without a message before sending it again |
+| Container application belongs to another Durable Object namespace | Run `npx wrangler containers list`, delete only the `field-trip-agent-sandbox` application by ID, then deploy again |
+| Files the agent wrote are gone | The container was replaced (redeploy) or slept (~10 min idle); persistent state is what survives |
 | Stuck? | `git switch -c fresh cpN` and carry on |
 
 More gotchas live in the skill's
@@ -251,12 +267,11 @@ hand-writing several checkpoints at once.
 8. Tools: validate input with valibot, return `{ output }` or a string, **throw**
    on failure so the model can recover, and pass `signal` to every `fetch`.
    Wikipedia requests need a descriptive `User-Agent` header.
-9. The virtual sandbox is ephemeral. Anything that must survive goes in
-   `usePersistentState`.
-10. In `durable: true` tools, every side effect goes inside `step.do(name, fn)`
-    with a deterministic `name`.
-11. Never commit `.dev.vars`, `.env`, or secrets.
-12. Stay within the attendee's current checkpoint; don't pull later checkpoints'
+9. Sandbox files (the cp5 container) don't survive a sleep or redeploy. Anything
+   that must survive goes in `usePersistentState`. Keep `@cloudflare/sandbox` at
+   `0.12.10` (not 1.x) and the `Dockerfile` tag equal to it.
+10. Never commit `.dev.vars`, `.env`, or secrets.
+11. Stay within the attendee's current checkpoint; don't pull later checkpoints'
     code forward.
-13. `src/ui/index.html` is given scaffolding. Don't edit it unless the attendee
+12. `src/ui/index.html` is given scaffolding. Don't edit it unless the attendee
     asks. It already renders tool calls and any `data-<name>` parts.
