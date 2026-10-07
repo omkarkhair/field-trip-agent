@@ -130,7 +130,12 @@ async function main() {
       body: JSON.stringify({ kind: 'user', body: message }),
     });
     accepted = res.status === 202;
-    if (accepted) ({ submissionId } = await res.json());
+    if (accepted) {
+      ({ submissionId } = await res.json());
+      if (typeof submissionId !== 'string' || submissionId.length === 0) {
+        throw new Error('the response did not contain a valid submissionId');
+      }
+    }
   } catch (error) {
     if (accepted) {
       throw new Error('POST returned 202 but its response body failed. It was accepted; re-run without a message to check before sending again.');
