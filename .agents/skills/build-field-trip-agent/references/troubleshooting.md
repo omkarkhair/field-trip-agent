@@ -7,7 +7,7 @@ Format: **symptom** → cause → fix. Newest checkpoint last.
 
 **`vite dev` fails: "The Cloudflare plugin is not receiving Flue's Worker configuration"**
 → The flueframework.com example shows `cloudflare()` with no arguments, but Flue
-2.1.1 requires the config customizer.
+2.0.0 requires the config customizer.
 → Fix `vite.config.ts`:
 ```ts
 import { flue, flueWorkerConfig } from '@flue/vite';
@@ -45,8 +45,10 @@ or a dropped connection), and the UI fell back to polling the snapshot every
 1.5 s. Replies still arrive, just all at once. No action needed.
 
 **Chat UI shows an old conversation / you want a clean slate**
-→ Click **New conversation**. The id is kept in `localStorage`
-(`fieldtrip.conversationId`) and is independent of the ids you use with `npm run smoke`.
+→ Click **New conversation**. The id lives in the URL (`/?id=web-xxxxxx`): bookmark
+it, open several tabs with different ids, or open a smoke conversation with
+`/?id=<smoke-id>`. Older checkpoint tags still keep the id in `localStorage`
+and may show extra checkpoint cards; ignore those.
 
 **Fonts look plain in the UI**
 → Space Grotesk / JetBrains Mono load from Google Fonts. Offline, the UI falls
@@ -167,7 +169,7 @@ roughly 4–5 s each. The chat UI shows each `⚙` chip as it happens.
 ## cp4
 
 **`Timed out after 180s` on the suggestion turn**
-→ Run it with `TIMEOUT_S=200`. The work keeps going after a timeout, so
+→ The work keeps going after a timeout. Do not immediately send the prompt again:
 re-run `npm run smoke -- <url> <id>` (no message) to read the result. If turns
 regularly exceed ~60 s, check that the parent sends **one** `task` (rule 4c)
 and that the scout has `model: '…llama-4-scout…'`. On Gemma, the scout takes
@@ -228,7 +230,7 @@ say "Do not repeat the file in your reply … reply in one sentence". The user
 sees the file through the `read` result.
 
 **`exec` errors like `sandbox.exec(...).then is not a function` / stdout undefined after `npm install`**
-→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.1.1 needs
+→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.0.0 needs
 0.x: `npm install --save-exact @cloudflare/sandbox@0.12.10` and keep the
 Dockerfile tag the same.
 
@@ -241,6 +243,13 @@ to rebuild the image.
 → Add the `declare module 'cloudflare:workers'` block to `src/env.d.ts`. The build
 works without it; only the typechecker needs it.
 
+**`npm run deploy` ends with `Login failed with code: 1` after `lookup registry.cloudflare.com … no such host`**
+→ Docker's VM lost DNS (common on flaky Wi-Fi). The Worker itself **was** uploaded
+(`Uploaded field-trip-agent`), only the image push step failed; if the `Dockerfile`
+didn't change, the old image keeps working. Check with
+`docker run --rm alpine nslookup registry.cloudflare.com`, then re-run `npm run deploy`.
+Not a wrangler login problem.
+
 **Deploy fails mentioning containers / not entitled / `max_instances`**
 → The account doesn't have Containers enabled. Use the workshop account
 (`npx wrangler whoami` shows which one you're on), or Workers Paid.
@@ -251,7 +260,8 @@ slept. The brief survives because it's state in the agent's DO. That's the
 point of the demo.
 
 **The first message of a new conversation is a few seconds slower**
-→ Container cold start. Every conversation gets its own container.
+→ Container cold start. In cp5 every conversation starts its container on the
+first message; cp6 makes it lazy (only when the itinerary needs files).
 
 ## cp6
 
@@ -263,6 +273,18 @@ Ingestion takes a minute or two. Look under the agent's Durable Object
 **`npx wrangler tail` doesn't show the `forecast` log**
 → Expected: tail sees the short request/RPC/alarm invocations, but the response
 runs detached from them. Use the dashboard's Logs view.
+
+**`[advisory] The agent's execution environment (sandbox) was replaced.` in the output**
+→ Expected (cp6+): `open_workspace` flipped the `workspace` flag and Flue attached
+the sandbox at the next turn boundary. It appears once per conversation.
+
+**The model writes the itinerary as text, or says it has no `write` tool**
+→ It skipped `open_workspace`. Check rule 5 starts with "if you have no `write`
+tool yet, call `open_workspace` first", and resend.
+
+**"Hi" still starts a container (cp6+)**
+→ That conversation already opened the workspace: the flag is persistent state,
+so every later message re-attaches. Use a fresh conversation id.
 
 **`log.info(...)` in a tool shows nothing anywhere**
 → Flue's tool `log` goes to the runtime event stream (`observe()` subscribers),

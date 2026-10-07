@@ -33,7 +33,7 @@
    agent's DO and survive anything. Container files survive between messages
    while the container is awake, but **not** a sleep (~10 min idle) or a
    redeploy. Show it: redeploy, then `ls /workspace` is empty but the brief is
-   still there. That's cp7's theme.
+   still there. This checkpoint makes that durability boundary visible.
 5. **Subagents share the parent's sandbox**: `venue-scout` gets the same tools
    and files.
 
@@ -269,8 +269,8 @@ its own container (~1.3 GB RAM locally on Apple Silicon, see troubleshooting).
 
 ```bash
 npm run smoke -- http://localhost:5173 cp5-local "Offsite in Lisbon from <START> to <END> for 14 people, budget 400 EUR each. We like food, history and the outdoors."
-TIMEOUT_S=200 npm run smoke -- http://localhost:5173 cp5-local "Suggest 3 places for our offsite."
-TIMEOUT_S=200 npm run smoke -- http://localhost:5173 cp5-local "Write the itinerary to itinerary.md and show it to me."
+npm run smoke -- http://localhost:5173 cp5-local "Suggest 3 places for our offsite."
+npm run smoke -- http://localhost:5173 cp5-local "Write the itinerary to itinerary.md and show it to me."
 npm run smoke -- http://localhost:5173 cp5-local "Show me itinerary.md again."
 ```
 
