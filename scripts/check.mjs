@@ -21,11 +21,17 @@ const fail = (msg, hint) => {
 
 console.log('\nField Trip Agent — pre-work check\n');
 
-// 1. Node version (Flue requires >= 22.19.0)
+// 1. Node version (the pinned Flue dependency tree excludes Node 23)
 {
   const [major, minor] = process.versions.node.split('.').map(Number);
-  if (major > 22 || (major === 22 && minor >= 19)) pass(`Node ${process.versions.node}`);
-  else fail(`Node ${process.versions.node} is too old`, 'Install Node 22.19 or newer: https://nodejs.org');
+  const supported = (major === 22 && minor >= 19) || major > 24 || (major === 24 && minor >= 11);
+  if (supported) pass(`Node ${process.versions.node}`);
+  else {
+    fail(
+      `Node ${process.versions.node} is unsupported`,
+      'Install Node 22.19+ LTS or 24.11+: https://nodejs.org',
+    );
+  }
 }
 
 // 2. Dependencies installed at the pinned versions
@@ -33,7 +39,7 @@ console.log('\nField Trip Agent — pre-work check\n');
   const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
   const wanted = { ...pkg.dependencies, ...pkg.devDependencies };
   if (!existsSync(new URL('../node_modules', import.meta.url))) {
-    fail('Dependencies not installed', 'Run: npm install');
+    fail('Dependencies not installed', 'Run: npm ci');
   } else {
     const wrong = [];
     for (const [name, version] of Object.entries(wanted)) {
@@ -47,7 +53,7 @@ console.log('\nField Trip Agent — pre-work check\n');
       }
     }
     if (wrong.length === 0) pass(`Dependencies installed (${Object.keys(wanted).length} packages)`);
-    else fail(`Dependency mismatch: ${wrong.join(', ')}`, 'Run: npm install');
+    else fail(`Dependency mismatch: ${wrong.join(', ')}`, 'Run: npm ci');
   }
 }
 

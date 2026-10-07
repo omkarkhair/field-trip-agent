@@ -19,7 +19,6 @@ for the checkpoint you are implementing.** Each file has:
 | `cp4` | `cp/4-subagent` | 8 | [cp4-subagent.md](checkpoints/cp4-subagent.md) |
 | `cp5` | `cp/5-sandbox` | 5 (cut line) | [cp5-sandbox.md](checkpoints/cp5-sandbox.md) |
 | `cp6` | `cp/6-iterate-observe` | 7 | [cp6-iterate-observe.md](checkpoints/cp6-iterate-observe.md) |
-| `cp7` | `cp/7-durability` | 6 (instructor-led) | [cp7-durability.md](checkpoints/cp7-durability.md) |
 
 ## Conventions
 
