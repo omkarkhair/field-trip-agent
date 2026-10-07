@@ -119,10 +119,12 @@ The session is split into checkpoints. Each one has a tested branch
 ```bash
 git stash push -u -m "my work" # keep tracked and untracked work
 git fetch origin
+git branch "workshop-backup-$(date +%Y%m%d-%H%M%S)" # preserve the current commit too
 git switch --no-track -C workshop origin/cp/3-api-tools
 npm ci                         # later checkpoints may add dependencies
 ```
 
+The timestamped backup branch preserves commits that a stash would not capture.
 Then re-run that checkpoint's verify step. Or ask your coding agent: *"catch me up
 to checkpoint 3"* — the skill knows how.
 
