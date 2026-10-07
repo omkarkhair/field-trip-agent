@@ -24,7 +24,7 @@ model and tool call through production traces.
 | Sub-agent delegation | A `venue-scout` sub-agent with its own tool, its own model, and a fresh context |
 | Sandbox strategies | No sandbox → in-memory virtual sandbox → Cloudflare Computer → Cloudflare Sandbox container (built) |
 | Deploy, test, iterate | `vite dev` → `wrangler deploy` → test live → read traces |
-| Durable Objects | One Durable Object per conversation with persistent, isolated state |
+| Durable Objects | One agent Durable Object per conversation, plus a Sandbox container-manager Durable Object |
 
 ---
 
