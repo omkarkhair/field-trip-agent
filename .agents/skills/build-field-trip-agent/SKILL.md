@@ -1,13 +1,13 @@
 ---
 name: build-field-trip-agent
-description: Use when building, fixing, verifying, deploying, or catching up on the Flue Field Trip agent workshop project (a durable team-offsite planner agent on Cloudflare Workers with Flue, Workers AI, tools, a subagent, a sandbox, and durable tools). Covers checkpoints cp0-cp7.
+description: Use when building, fixing, verifying, deploying, or catching up on the Flue Field Trip agent workshop project (a durable team-offsite planner agent on Cloudflare Workers with Flue, Workers AI, tools, a subagent, and a sandbox). Covers checkpoints cp0-cp6.
 ---
 
 # Build the Field Trip Agent
 
 You are helping a workshop attendee build **FieldTrip**, a team-offsite planner
 agent, with the [Flue Framework](https://flueframework.com) on Cloudflare Workers.
-The work is split into checkpoints `cp0`…`cp7`. Each checkpoint has a git tag and
+The work is split into checkpoints `cp0`…`cp6`. Each checkpoint has a git tag and
 a branch containing verified working code.
 
 Your job: **find where the attendee is, move them forward exactly one
@@ -38,7 +38,6 @@ files. The highest row that matches wins:
 
 | Evidence | At least |
 |---|---|
-| `src/tools/booking.ts` exists with `durable: true` | cp7 |
 | `wrangler.jsonc` has `"observability"` enabled | cp6 |
 | `src/agents/field-trip.ts` calls `useSandbox(` | cp5 |
 | `src/subagents/venue-scout.ts` exists and is mounted via `useSubagent(` | cp4 |
@@ -79,7 +78,7 @@ counts as the previous checkpoint plus work in progress.
   the URL (`/?id=<id>`), so `/?id=cp2-local` opens the same conversation a smoke
   command used, and bookmarks/tabs keep separate conversations. The UI is
   scaffolding in `src/ui/index.html`: don't modify it unless the attendee asks.
-- For checkpoints that deploy (cp1, cp6, cp7): run `npm run deploy`, then the
+- For checkpoints that deploy (cp1 and cp6): run `npm run deploy`, then the
   same smoke command against the printed `https://field-trip-agent.<subdomain>.workers.dev` URL.
 - If verification fails: check `references/troubleshooting.md`, fix it, and
   re-verify. Don't report success without a passing verify.
@@ -103,11 +102,11 @@ hand-write several checkpoints.** Offer a clean jump instead:
 git stash push -u -m "my work"     # optional: keep their changes
 git fetch --all --tags
 git switch -c my-cpN cpN           # N = the checkpoint the room is on
-npm install                        # later checkpoints may add dependencies
+npm ci                             # later checkpoints may add dependencies
 ```
 
 Then run that checkpoint's verify command to confirm the jump worked. Branches
-`cp/1-hello-agent` … `cp/7-durability` hold the same code as the tags.
+`cp/1-hello-agent` … `cp/6-iterate-observe` hold the same code as the tags.
 
 If they want to keep their own edits, compare them with
 `git diff cpN -- src/ wrangler.jsonc` and help them close the gap.
@@ -134,10 +133,10 @@ If they want to keep their own edits, compare them with
 7. `flue run` can't run this project (Workers AI needs `vite dev` or a deploy).
    Always verify through `npm run dev` + `npm run smoke`.
 8. When flueframework.com and the installed package disagree, trust
-   `npx flue docs read <page>`, which ships with the installed version (2.1.1).
+   `npx flue docs read <page>`, which ships with the installed version (2.0.0).
 9. Never create or commit `.dev.vars`/`.env` secrets. Workers AI needs no API keys.
 10. **Keep diffs minimal.** Some attendees paste code by hand: make the smallest
     change that passes verify, and show the checkpoint's *Diff* section rather
     than whole files when explaining.
 11. cp5 needs Docker running and an account with Containers. Pin
-    `@cloudflare/sandbox@0.12.10` (1.x breaks Flue 2.1.1) with a matching `Dockerfile` tag.
+    `@cloudflare/sandbox@0.12.10` (1.x breaks Flue 2.0.0) with a matching `Dockerfile` tag.

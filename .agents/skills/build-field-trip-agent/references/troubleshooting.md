@@ -7,7 +7,7 @@ Format: **symptom** → cause → fix. Newest checkpoint last.
 
 **`vite dev` fails: "The Cloudflare plugin is not receiving Flue's Worker configuration"**
 → The flueframework.com example shows `cloudflare()` with no arguments, but Flue
-2.1.1 requires the config customizer.
+2.0.0 requires the config customizer.
 → Fix `vite.config.ts`:
 ```ts
 import { flue, flueWorkerConfig } from '@flue/vite';
@@ -48,7 +48,7 @@ or a dropped connection), and the UI fell back to polling the snapshot every
 → Click **New conversation**. The id lives in the URL (`/?id=web-xxxxxx`): bookmark
 it, open several tabs with different ids, or open a smoke conversation with
 `/?id=<smoke-id>`. Older checkpoint tags still keep the id in `localStorage`
-and show a cp2 bonus card and a cp7 chip; ignore those.
+and may show extra checkpoint cards; ignore those.
 
 **Fonts look plain in the UI**
 → Space Grotesk / JetBrains Mono load from Google Fonts. Offline, the UI falls
@@ -169,7 +169,7 @@ roughly 4–5 s each. The chat UI shows each `⚙` chip as it happens.
 ## cp4
 
 **`Timed out after 180s` on the suggestion turn**
-→ Run it with `TIMEOUT_S=200`. The work keeps going after a timeout, so
+→ The work keeps going after a timeout. Do not immediately send the prompt again:
 re-run `npm run smoke -- <url> <id>` (no message) to read the result. If turns
 regularly exceed ~60 s, check that the parent sends **one** `task` (rule 4c)
 and that the scout has `model: '…llama-4-scout…'`. On Gemma, the scout takes
@@ -230,7 +230,7 @@ say "Do not repeat the file in your reply … reply in one sentence". The user
 sees the file through the `read` result.
 
 **`exec` errors like `sandbox.exec(...).then is not a function` / stdout undefined after `npm install`**
-→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.1.1 needs
+→ `@cloudflare/sandbox` 1.x was installed (it's `latest`). Flue 2.0.0 needs
 0.x: `npm install --save-exact @cloudflare/sandbox@0.12.10` and keep the
 Dockerfile tag the same.
 

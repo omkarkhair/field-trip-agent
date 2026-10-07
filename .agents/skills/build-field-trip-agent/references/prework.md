@@ -5,7 +5,7 @@ Everything here should be done **before** the session. The starter on `main`
 
 ## Steps
 
-1. **Node.js ≥ 22.19**: `node --version`
+1. **Node.js 22.19+ LTS or 24.11+**: `node --version` (Node 23 is unsupported)
 2. **Cloudflare account** with a `workers.dev` subdomain. Use the **workshop account** you were given: it has Containers enabled, which cp5 needs. (On your own account, cp1–cp4 run on the free plan; cp5 onward needs Workers Paid for Containers.)
    First-time users: open **Workers & Pages** in <https://dash.cloudflare.com>
    once so the subdomain gets created.
@@ -13,7 +13,7 @@ Everything here should be done **before** the session. The starter on `main`
    ```bash
    git clone <repo-url> field-trip-agent
    cd field-trip-agent
-   npm install
+   npm ci
    ```
 4. **Log in**: `npx wrangler login` (opens a browser; approve the OAuth scopes,
    which include Workers AI)
@@ -40,8 +40,8 @@ Everything here should be done **before** the session. The starter on `main`
 
 | Line | Pass condition | Fix |
 |---|---|---|
-| `✔ Node x.y.z` | Node ≥ 22.19.0 | install a newer Node |
-| `✔ Dependencies installed (10 packages)` | every dep in `package.json` installed at the **exact** pinned version | `npm install` |
+| `✔ Node x.y.z` | Node 22.19+ or 24.11+ | install a supported LTS release |
+| `✔ Dependencies installed (10 packages)` | every dep in `package.json` installed at the **exact** pinned version | `npm ci` |
 | `✔ Logged in to Cloudflare as …` | `wrangler whoami --json` reports `loggedIn: true` | `npx wrangler login` |
 | `! You have access to several Cloudflare accounts` | warning only | `export CLOUDFLARE_ACCOUNT_ID=<id>` or pick it when wrangler prompts |
 | `! Your token may be missing the Workers AI scope` | warning only | re-run `npx wrangler login` |
@@ -65,10 +65,10 @@ Exit code 0 means ready.
 
 ## Pinned versions
 
-`@flue/runtime` `@flue/vite` `@flue/cli` 2.1.1 · `@cloudflare/vite-plugin` 1.62.0 ·
+`@flue/runtime` `@flue/vite` `@flue/cli` 2.0.0 · `@cloudflare/vite-plugin` 1.62.0 ·
 `wrangler` 4.143.0 · `vite` 8.3.1 · `hono` 4.13.10 · `valibot` 1.5.0 ·
 `just-bash` 3.4.2 · `typescript` 7.0.2 · from cp5: `@cloudflare/sandbox` 0.12.10
-(**not** 1.x: Flue 2.1.1's `cloudflareSandbox()` needs the 0.x `exec` API)
+(**not** 1.x: Flue 2.0.0's `cloudflareSandbox()` needs the 0.x `exec` API)
 
 Don't upgrade during the workshop: the checkpoint code is verified against
 exactly these versions.

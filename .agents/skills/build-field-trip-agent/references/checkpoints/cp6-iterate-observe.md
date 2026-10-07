@@ -332,7 +332,7 @@ Lazy sandbox (fresh id; on the live URL, or locally with `docker ps` in another 
 ```bash
 npm run smoke -- <url> cp6-lazy "Hi, who are you? One sentence."
 npm run smoke -- <url> cp6-lazy "Offsite in Porto from <START> to <END> for 10 people. We like wine, architecture and walking."
-TIMEOUT_S=200 npm run smoke -- <url> cp6-lazy "Write the itinerary to itinerary.md and show it to me."
+npm run smoke -- <url> cp6-lazy "Write the itinerary to itinerary.md and show it to me."
 npm run smoke -- <url> cp6-lazy "Show me itinerary.md again."
 ```
 
@@ -375,5 +375,4 @@ detached from the invocation that starts it). Use the dashboard.
 "Four lines of config and you can see every model turn, token count and tool
 call your agent made, per response, in production. And one iteration: three
 lines made the sandbox lazy, because a hook can be conditional and a tool can
-flip the state that gates it. Next (cp7): what happens
-when the deploy lands in the middle of a booking."
+flip the state that gates it. You now have the complete six-checkpoint agent."

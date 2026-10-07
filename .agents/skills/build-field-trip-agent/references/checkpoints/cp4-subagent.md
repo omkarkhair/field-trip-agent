@@ -274,7 +274,7 @@ works too), on a **fresh** conversation id. With `npm run dev` running:
 
 ```bash
 npm run smoke -- http://localhost:5173 cp4-local "Offsite in Lisbon from <START> to <END> for 14 people, budget 400 EUR each. We like food, history and the outdoors."
-TIMEOUT_S=200 npm run smoke -- http://localhost:5173 cp4-local "Suggest 3 places for our offsite."
+npm run smoke -- http://localhost:5173 cp4-local "Suggest 3 places for our offsite."
 ```
 
 Pass:
@@ -293,7 +293,7 @@ Then deploy and repeat on the live URL with a fresh id:
 ```bash
 npm run deploy
 npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp4-live "Offsite in Porto from <START> to <END> for 10 people. We like wine, architecture and walking."
-TIMEOUT_S=200 npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp4-live "Suggest 3 places for our offsite."
+npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp4-live "Suggest 3 places for our offsite."
 ```
 
 ### Sample passing output (reference build)
@@ -322,7 +322,7 @@ Here are three suggestions for your Lisbon offsite:
 
 Reference timings: about 27–47 s for the suggestion turn (local, 4 runs) and
 32 s live. The scout's task itself takes ~5 s; the rest is Gemma's turns in the
-parent. Use `TIMEOUT_S=200` for headroom; the smoke default is 180 s.
+parent. The smoke default of 180 s leaves ample headroom.
 
 ## What to tell the attendee
 
