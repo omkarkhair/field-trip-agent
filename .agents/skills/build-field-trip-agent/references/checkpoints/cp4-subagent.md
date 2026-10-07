@@ -145,7 +145,7 @@ export const getPlaceSummary = defineTool({
 ```ts
 // An ordinary module, NOT 'use agent': a subagent is a capability of the agent
 // that mounts it, not a registered agent. It has no URL, no conversation id,
-// no persistent state, and no useModel() (it inherits the parent's model).
+// no persistent state, and no useModel(). Its model is set in defineSubagent.
 import { defineSubagent, useTool } from '@flue/runtime';
 import { getPlaceSummary } from '../tools/wikipedia.ts';
 
@@ -236,9 +236,8 @@ export function FieldTrip() {
   // The parent finds candidate places (Wikipedia geosearch)...
   useTool(findNearbyPlaces);
 
-  // ...and delegates assessing each one to a subagent. The model calls the
-  // built-in `task` tool once per place; each scout runs in a fresh context
-  // with its own tools, and only its final answer comes back here.
+  // ...and delegates assessing all three to one subagent call. The scout runs
+  // in a fresh context with its own tools, and only its final answer comes back.
   useSubagent(venueScout);
 
   // The agent re-renders before every model call, so these instructions
@@ -287,14 +286,6 @@ Pass:
    indoor/outdoor places to the forecast days.
 
 The chat UI's cp4 chip ("Suggest 3 venues near the city centre…") works the same way.
-
-Then deploy and repeat on the live URL with a fresh id:
-
-```bash
-npm run deploy
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp4-live "Offsite in Porto from <START> to <END> for 10 people. We like wine, architecture and walking."
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp4-live "Suggest 3 places for our offsite."
-```
 
 ### Sample passing output (reference build)
 
