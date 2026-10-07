@@ -100,13 +100,14 @@ hand-write several checkpoints.** Offer a clean jump instead:
 ```bash
 git stash push -u -m "my work"     # required when the tree is dirty
 git fetch origin
+git branch "workshop-backup-$(date +%Y%m%d-%H%M%S)" # preserve current commits
 git switch --no-track -C workshop origin/cp/3-api-tools # example: checkpoint 3
 npm ci                             # later checkpoints may add dependencies
 ```
 
 Then run that checkpoint's verify command to confirm the jump worked. Use the
-matching branch from the checkpoint index. The reusable branch makes repeated
-recovery safe after the attendee's work has been stashed.
+matching branch from the checkpoint index. The stash preserves uncommitted work;
+the timestamped branch preserves commits before the reusable branch is reset.
 
 If they want to keep their own edits, compare them with
 `git diff origin/cp/3-api-tools -- src/ wrangler.jsonc` (using their checkpoint's
