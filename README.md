@@ -8,8 +8,6 @@ URL that plans a team offsite: it remembers the trip brief, checks the weather,
 delegates venue research to a sub-agent, writes an itinerary, and exposes each
 model and tool call through production traces.
 
-**Try the live demo:** <https://field-trip-agent.omkk.workers.dev/>
-
 > **Using a coding agent** (OpenCode, Claude Code, Cursor, ...)? Point it at this
 > README and the skill in [`.agents/skills/build-field-trip-agent/`](.agents/skills/build-field-trip-agent/SKILL.md).
 > Rules for agents are at the [bottom of this file](#for-coding-agents).
@@ -152,6 +150,9 @@ chat UI streams replies live, shows every tool call as an expandable chip, and
 has example prompts for each checkpoint. **New conversation** starts a fresh
 Durable Object. The browser keeps its conversation id in local storage and shows
 it in the header; terminal smoke checks use the explicit id passed to the command.
+
+The historical checkpoint UI still shows a cp7 booking example. Cp7 is outside
+this workshop and no booking tool is mounted, so ignore that prompt.
 
 **From the terminal:**
 
