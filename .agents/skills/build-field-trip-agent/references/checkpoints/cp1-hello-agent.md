@@ -3,7 +3,7 @@
 - **Goal:** the first agent, answering locally *and* on the live `workers.dev` URL.
 - **Time:** 9 min. Deploying here is deliberate: account and login problems
   surface early, while there's still time to fix them.
-- **Tag / branch:** `cp1` / `cp/1-hello-agent`
+- **Branch:** `fix/flue-2.0.0-cp1`
 - **Files:** `src/agents/field-trip.ts` (new), `src/app.ts`, `wrangler.jsonc`.
   Delete `src/agents/.gitkeep`.
 

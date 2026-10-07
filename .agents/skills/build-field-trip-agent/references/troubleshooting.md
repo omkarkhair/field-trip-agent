@@ -261,9 +261,9 @@ Not a wrangler login problem.
 (`npx wrangler whoami` shows which one you're on), or Workers Paid.
 
 **`itinerary.md` is gone**
-→ Expected after a redeploy or ~10 min idle: the container was replaced or
-slept. The brief survives because it's state in the agent's DO. That's the
-point of the demo.
+→ The container was replaced, possibly after a deployment or idle sleep. Files
+are not durable; the brief survives because it's state in the agent's DO. A
+no-op redeploy does not guarantee immediate replacement.
 
 **The first message of a new conversation is a few seconds slower**
 → Container cold start. In cp5 every conversation starts its container on the
