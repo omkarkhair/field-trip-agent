@@ -116,14 +116,6 @@ Pass:
 2. Message 2 shows `⚙ save_trip_brief({"headcount":16})`: only the changed field.
 3. Message 3 answers **16**, Lisbon, 400 EUR. The merge kept the other fields.
 
-Then deploy and repeat on the live URL (any fresh id):
-
-```bash
-npm run deploy
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp2-live "Offsite in Porto, 2026-10-15, 20 people, budget 300 EUR each, we love wine and hiking."
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp2-live "What's my headcount? One line."
-```
-
 ### Sample passing output (reference build)
 
 ```

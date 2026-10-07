@@ -237,14 +237,6 @@ npm run smoke -- http://localhost:5173 cp3-err "What will the weather be in Lisb
 Pass: `get_forecast` shows `✘ Forecast unavailable …` in red, and the reply
 explains that forecasts only go 16 days ahead. It doesn't invent a forecast.
 
-Then deploy and repeat on the live URL with a fresh id:
-
-```bash
-npm run deploy
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp3-live "Offsite in Porto from <START> to <END> for 10 people. We like wine and walking."
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp3-live "Will it rain during our trip?"
-```
-
 ### Sample passing output (reference build)
 
 ```
