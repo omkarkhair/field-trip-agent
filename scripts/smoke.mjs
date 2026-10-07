@@ -140,6 +140,12 @@ async function main() {
         `POST timed out after ${requestTimeoutMs / 1000}s. It may have been accepted; re-run without a message to check before sending again.`,
       );
     }
+    if (['ECONNRESET', 'EPIPE', 'ETIMEDOUT', 'UND_ERR_SOCKET', 'UND_ERR_HEADERS_TIMEOUT', 'UND_ERR_BODY_TIMEOUT'].includes(error.cause?.code)) {
+      throw new Error(
+        `POST failed before a response: ${error.message}. It may have been accepted; re-run without a message to check before sending again.`,
+        { cause: error },
+      );
+    }
     throw error;
   }
   if (res.status !== 202) {

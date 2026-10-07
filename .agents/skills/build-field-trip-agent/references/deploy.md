@@ -69,7 +69,9 @@ reorder, or delete an entry that has been deployed.
   running. Later deploys push only changed layers (usually none).
 - The output shows `Deploy a container application … NEW field-trip-agent-sandbox`
   the first time.
-- A redeploy **replaces running containers**: their files are gone; agent state is not.
+- Container files are lost when their instance stops or restarts, so they are
+  not durable. A deploy with no effective container change does not roll out a
+  new instance; agent state remains durable either way.
 - `max_instances: 10` caps concurrent containers (one per active conversation).
   Idle containers sleep after ~10 min.
 - Bundle grows from ~0.6 to ~0.97 MiB gzipped (limit: 3 MiB free / 10 MiB paid).
