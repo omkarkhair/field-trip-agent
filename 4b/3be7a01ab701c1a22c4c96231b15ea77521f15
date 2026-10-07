@@ -1,0 +1,19 @@
+README.md
+  s_8bbf00d03f994d::t_9241f6ca2b4903 154-156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4b3be7a01ab701c1a22c4c96231b15ea77521f15",
+  "prompts": {},
+  "sessions": {
+    "s_8bbf00d03f994d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a11643-d82c-7a21-97de-c853a2ac037c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Stephane Nouvellon <stephane@cloudflare.com>"
+    }
+  }
+}
