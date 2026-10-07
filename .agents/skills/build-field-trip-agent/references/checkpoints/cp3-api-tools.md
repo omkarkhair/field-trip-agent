@@ -3,7 +3,7 @@
 - **Goal:** the agent looks up the weather for the trip dates by chaining two
   tools that call Open-Meteo (free, no API key).
 - **Time:** 9 min
-- **Branch:** `fix/flue-2.0.0-cp3`
+- **Branch:** `cp/3-api-tools`
 - **Files:** `src/tools/weather.ts` (new), `src/agents/field-trip.ts`. No config
   change, no new migration. Outbound `fetch` needs no binding.
 

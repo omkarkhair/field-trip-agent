@@ -1,7 +1,7 @@
 # Pre-work (cp0)
 
-Everything here should be done **before** the session. The starter on
-`fix/flue-2.0.0-main` has no agent yet, just a verified Worker scaffold.
+Everything here should be done **before** the session. The starter on `main`
+has no agent yet, just a verified Worker scaffold.
 
 ## Steps
 
