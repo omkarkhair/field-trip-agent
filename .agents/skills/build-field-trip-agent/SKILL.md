@@ -7,8 +7,8 @@ description: Use when building, fixing, verifying, deploying, or catching up on 
 
 You are helping a workshop attendee build **FieldTrip**, a team-offsite planner
 agent, with the [Flue Framework](https://flueframework.com) on Cloudflare Workers.
-The work is split into checkpoints `cp0`…`cp6`. The starter is
-`fix/flue-2.0.0-main`; checkpoints 1–6 use tested `fix/flue-2.0.0-cpN` branches.
+The work is split into checkpoints `cp0`…`cp6`. The starter is `main`;
+checkpoints 1–6 use the tested `cp/*` branches listed in the checkpoint index.
 
 Your job: **find where the attendee is, move them forward exactly one
 checkpoint, prove it works, and tell them what they learned.** The session is
@@ -100,17 +100,17 @@ hand-write several checkpoints.** Offer a clean jump instead:
 ```bash
 git stash push -u -m "my work"     # required when the tree is dirty
 git fetch origin
-git switch --no-track -C workshop origin/fix/flue-2.0.0-cpN
-git restore --source=origin/main -- scripts/check.mjs scripts/smoke.mjs .agents/skills/build-field-trip-agent
+git switch --no-track -C workshop origin/cp/3-api-tools # example: checkpoint 3
 npm ci                             # later checkpoints may add dependencies
 ```
 
-Then run that checkpoint's verify command to confirm the jump worked. Replace
-`N` with the checkpoint number (`1`…`6`). The reusable branch makes repeated
+Then run that checkpoint's verify command to confirm the jump worked. Use the
+matching branch from the checkpoint index. The reusable branch makes repeated
 recovery safe after the attendee's work has been stashed.
 
 If they want to keep their own edits, compare them with
-`git diff origin/fix/flue-2.0.0-cpN -- src/ wrangler.jsonc` and help them close the gap.
+`git diff origin/cp/3-api-tools -- src/ wrangler.jsonc` (using their checkpoint's
+branch) and help them close the gap.
 
 ## Non-negotiable rules
 

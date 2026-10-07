@@ -106,6 +106,19 @@ test('a timeout after 202 reports that the POST was accepted', async (t) => {
   assert.match(result.stderr, /It was accepted/);
 });
 
+test('a 202 without a submission id fails immediately as accepted', async (t) => {
+  const { server, baseUrl } = await listen((_req, res) => {
+    res.writeHead(202, { 'content-type': 'application/json' });
+    res.end('{}');
+  });
+  t.after(() => server.close());
+
+  const result = await runSmoke(baseUrl, ['hello']);
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /It was accepted/);
+  assert.ok(result.elapsedMs < 500, `expected <500ms, got ${result.elapsedMs}ms`);
+});
+
 test('a reset POST connection is treated as an ambiguous submission', async (t) => {
   let requests = 0;
   const { server, baseUrl } = await listen((req) => {

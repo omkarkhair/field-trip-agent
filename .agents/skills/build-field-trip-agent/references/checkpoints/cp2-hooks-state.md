@@ -3,7 +3,7 @@
 - **Goal:** the agent captures the trip brief with a tool, remembers it
   durably, and answers from it.
 - **Time:** 6 min
-- **Branch:** `fix/flue-2.0.0-cp2`
+- **Branch:** `cp/2-hooks-state`
 - **Files:** `src/agents/field-trip.ts` only. No config change, no new migration:
   state lives in the same Durable Object.
 
