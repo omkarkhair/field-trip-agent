@@ -326,9 +326,11 @@ in the parent.
 **`cloudflare/...` model fails under `flue run`**
 → `flue run` is Node-only. Use `npm run dev` + `npm run smoke`.
 
-**Files written in the sandbox are gone on the next message**
-→ The virtual sandbox is rebuilt for each submission. Return content in the
-reply, or keep it in `usePersistentState`.
+**Files written in the virtual sandbox are gone on the next message**
+→ The `just-bash` virtual sandbox is rebuilt for each submission. The Cloudflare
+Sandbox container added at cp5 persists while it is awake, but files can still
+disappear after sleep or replacement. Keep durable data in persistent state or
+external storage.
 
 **Wikipedia returns 403**
 → A `User-Agent` header is missing. Send a descriptive one, e.g.
