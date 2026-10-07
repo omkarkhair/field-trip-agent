@@ -202,6 +202,7 @@ scripts/                        # check.mjs, smoke.mjs (plain Node — works on 
 |---|---|
 | `npm run check` says not logged in | `npx wrangler login`, then re-run the check |
 | `Port 5173 is already in use` | Another dev server (maybe another project) is running. Stop it, or `npm run dev -- --port 5180` and smoke against `http://localhost:5180` |
+| `ERR_FILE_NOT_FOUND_IN_OPTIMIZED_DEP_DIR` or `Cannot find module 'agents'` after switching checkpoints | Stop every workshop Vite process, run `npm ci` on the selected branch, then restart `npm run dev` |
 | Dev server: "Cloudflare plugin is not receiving Flue's Worker configuration" | `vite.config.ts` must use `cloudflare({ config: flueWorkerConfig() })` |
 | Deploy fails asking for a `workers.dev` subdomain | Open **Workers & Pages** in the dashboard once to create it |
 | Deploy fails with a Durable Object / migration error | Every agent needs a `new_sqlite_classes` migration in `wrangler.jsonc` — see cp1 |

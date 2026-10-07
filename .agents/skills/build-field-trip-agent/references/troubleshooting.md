@@ -61,6 +61,12 @@ back to system fonts. Harmless.
 → Start `npm run dev` (port 5173) in another terminal. If 5173 is taken, Vite
 picks another port, so use the URL it prints.
 
+**`ERR_FILE_NOT_FOUND_IN_OPTIMIZED_DEP_DIR` / `Cannot find module 'agents'` after switching checkpoints**
+→ The branch or `node_modules` changed while an old Vite process was still
+running, leaving its generated Worker and optimized dependency cache stale.
+→ Stop every workshop Vite process, run `npm ci` on the selected branch, then
+start `npm run dev` again. Do not run `npm ci` under a live dev server.
+
 ## cp1
 
 **`vite build` / `npm run deploy` warning: `[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use agent" … may not be preserved when bundling`**
