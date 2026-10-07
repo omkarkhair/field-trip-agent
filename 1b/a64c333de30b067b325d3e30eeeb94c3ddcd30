@@ -1,0 +1,33 @@
+.agents/skills/build-field-trip-agent/SKILL.md
+  s_8bbf00d03f994d::t_951cf919e4538a 102,108-109
+.agents/skills/build-field-trip-agent/references/checkpoints/cp4-subagent.md
+  s_8bbf00d03f994d::t_21c2311ba47a65 148,239-240
+.agents/skills/build-field-trip-agent/references/checkpoints/cp5-sandbox.md
+  s_8bbf00d03f994d::t_adb9e1358ecb41 230-231,283,286,289
+.agents/skills/build-field-trip-agent/references/checkpoints/cp6-iterate-observe.md
+  s_8bbf00d03f994d::t_7b133e130547dc 263-264
+.agents/skills/build-field-trip-agent/references/prework.md
+  s_8bbf00d03f994d::t_9670ce59c71eab 44,55
+.agents/skills/build-field-trip-agent/references/troubleshooting.md
+  s_8bbf00d03f994d::t_d4b5413ec2a553 329-333
+README.md
+  s_8bbf00d03f994d::t_8416dd5d5aa7e7 122,127
+scripts/smoke.test.mjs
+  s_8bbf00d03f994d::t_e3e25f7faa13a7 86,90,100,104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1ba64c333de30b067b325d3e30eeeb94c3ddcd30",
+  "prompts": {},
+  "sessions": {
+    "s_8bbf00d03f994d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a11643-d82c-7a21-97de-c853a2ac037c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Stephane Nouvellon <stephane@cloudflare.com>"
+    }
+  }
+}
