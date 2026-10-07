@@ -150,6 +150,9 @@ chat UI streams replies live, shows every tool call as an expandable chip, and
 has example prompts for each checkpoint. **New conversation** starts a fresh
 Durable Object.
 
+The historical checkpoint UI still shows a cp7 booking example. Cp7 is outside
+this workshop and no booking tool is mounted, so ignore that prompt.
+
 **From the terminal:**
 
 Every conversation lives at `/agents/field-trip/<id>`. The `<id>` is anything you
