@@ -4,7 +4,7 @@
   did in the Cloudflare dashboard. Plus one iteration: attach the sandbox only
   when it's needed, so "Hi" no longer starts a container.
 - **Time:** 7 min
-- **Tag / branch:** `cp6` / `cp/6-iterate-observe`
+- **Branch:** `fix/flue-2.0.0-cp6`
 - **Files:** `wrangler.jsonc`, `src/tools/weather.ts` (one log line),
   `src/agents/field-trip.ts` (lazy sandbox).
 
