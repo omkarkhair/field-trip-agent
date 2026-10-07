@@ -5,7 +5,7 @@
   "description": "Build It Workshop: a durable AI agent with the Flue Framework on Cloudflare Workers",
   "type": "module",
   "engines": {
-    "node": ">=22.19.0"
+    "node": "^22.19.0 || >=24.11.0"
   },
   "scripts": {
     "dev": "vite dev --strictPort",
@@ -13,6 +13,7 @@
     "deploy": "vite build && wrangler deploy",
     "check": "node scripts/check.mjs",
     "smoke": "node scripts/smoke.mjs",
+    "test": "node --test scripts/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
