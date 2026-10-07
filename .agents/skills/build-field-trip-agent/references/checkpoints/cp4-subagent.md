@@ -5,7 +5,7 @@
   typical visit length, weather dependency and group fit, and the parent
   combines that with the forecast.
 - **Time:** 8 min
-- **Tag / branch:** `cp4` / `cp/4-subagent`
+- **Branch:** `fix/flue-2.0.0-cp4`
 - **Files:** `src/tools/wikipedia.ts` (new), `src/subagents/venue-scout.ts`
   (new), `src/agents/field-trip.ts`. No config change, no new migration: a
   subagent is **not** a registered agent, so it gets no Durable Object.

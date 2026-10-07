@@ -3,8 +3,8 @@
 - **Goal:** each conversation gets its own Linux container. The agent writes
   `itinerary.md` there, reads it back, and the file is still there next message.
 - **Time:** 5 min. **Cut line:** if the room is behind, the instructor demos it
-  and attendees `git switch cp/5-sandbox`.
-- **Tag / branch:** `cp5` / `cp/5-sandbox`
+  and attendees recover to `fix/flue-2.0.0-cp5`.
+- **Branch:** `fix/flue-2.0.0-cp5`
 - **Needs:** an account with **Containers** enabled (workshop accounts have it;
   it's a Workers Paid feature) and **Docker running** for `npm run dev` and
   `npm run deploy`. See `prework.md`.
@@ -30,10 +30,11 @@
    from `src/cloudflare.ts`, binding + `v2` migration) that owns a container
    built from `./Dockerfile`.
 4. **Durable vs not:** the conversation and `usePersistentState` live in the
-   agent's DO and survive anything. Container files survive between messages
-   while the container is awake, but **not** a sleep (~10 min idle) or a
-   redeploy. Show it: redeploy, then `ls /workspace` is empty but the brief is
-   still there. This checkpoint makes that durability boundary visible.
+   agent's DO and survive container sleep, replacement, and Worker redeploys.
+   Container files survive between messages while the instance is awake but are
+   lost when it stops or restarts. A deploy with no effective container change
+   does not roll out a new instance, so use another conversation ID to
+   demonstrate isolation deterministically.
 5. **Subagents share the parent's sandbox**: `venue-scout` gets the same tools
    and files.
 
@@ -281,15 +282,15 @@ Pass:
 2. Message 4 shows the itinerary again: the file is still in the container.
 
 Then deploy (the first deploy pushes the image: ~1–2 min, longer on slow Wi-Fi)
-and repeat on the live URL with a fresh id. Optional durability demo:
+and repeat on the live URL with a fresh id. Optional isolation check:
 
 ```bash
-npm run deploy                     # redeploy replaces the container
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp5-live "Use bash to run: ls -la /workspace. Then tell me my headcount from the brief. One line each."
+npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp5-live-other "Use bash to run: ls -la /workspace. Then tell me whether a trip brief is saved."
 ```
 
-Pass: `ls` shows an empty `/workspace` (file gone with the old container), and
-the headcount is still right (state lives in the agent's DO).
+Pass: the different conversation does not inherit `cp5-live`'s itinerary or
+trip brief. Container loss after sleep or replacement is real but not a
+deterministic workshop check.
 
 ### Sample passing output (reference build)
 
@@ -303,11 +304,11 @@ agent ›
 I have created and saved your itinerary in itinerary.md.
 ✔ completed in 60.8s
 
-you › Use bash to run: ls -la /workspace. Then tell me my headcount from the brief. One line each.   (after a redeploy)
+you › Use bash to run: ls -la /workspace. Then tell me whether a trip brief is saved.   (in cp5-live-other)
 agent ›
   ⚙ bash({"command":"ls -la /workspace"}) → total 8 …
 The directory contains only `.` and `..`.
-Your headcount is 10.
+No trip brief is saved for this conversation.
 ✔ completed in 9.8s
 ```
 
@@ -319,6 +320,5 @@ first message of a conversation.
 
 "One line gave your agent a real Linux machine per conversation: it wrote a
 file, read it back, and could run any shell command. The container is itself
-a Durable Object. Notice what survived the redeploy: not the file, but the
-brief, because state lives in the agent's Durable Object. Next (cp6): change
-behaviour, redeploy, and watch it in traces."
+a Durable Object, but its files and the agent's persistent state have different
+lifecycle guarantees. Next (cp6): change behaviour, redeploy, and watch it in traces."
