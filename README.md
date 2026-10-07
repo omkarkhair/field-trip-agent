@@ -99,26 +99,25 @@ You tell it about an offsite — **city, dates, headcount, budget, interests** �
 
 ## Checkpoints
 
-The session is split into checkpoints. Each one has a tested Flue 2.0 branch
-(`fix/flue-2.0.0-cp1`…`fix/flue-2.0.0-cp6`) so you can always catch up.
+The session is split into checkpoints. Each one has a tested branch
+(`cp/1-hello-agent`…`cp/6-iterate-observe`) so you can always catch up.
 
 | Branch | Checkpoint | You build | You verify |
 |---|---|---|---|
-| `fix/flue-2.0.0-main` | **Starter** | — | `npm run check`, `/api/ping` → `pong` |
-| `fix/flue-2.0.0-cp1` | **Hello agent + first deploy** | `src/agents/field-trip.ts`, mount it in `src/app.ts`, add a Durable Object migration | agent replies locally **and** on your `workers.dev` URL |
-| `fix/flue-2.0.0-cp2` | **Hooks + persistent state** | `usePersistentState('brief')` + a `save_trip_brief` tool | a second message remembers your headcount |
-| `fix/flue-2.0.0-cp3` | **Tools calling external APIs** | `geocode_city`, `get_forecast` (Open-Meteo) | a weather question shows tool calls in the conversation |
-| `fix/flue-2.0.0-cp4` | **Sub-agent delegation** | Wikipedia tools; a `venue-scout` sub-agent with its own tool and model | the parent finds places, calls `task`, and combines the scout's assessment with the weather |
-| `fix/flue-2.0.0-cp5` | **Sandbox** | a Cloudflare Sandbox container per conversation | the agent writes `itinerary.md` and reads it back |
-| `fix/flue-2.0.0-cp6` | **Iterate + observe** | change behavior, redeploy, turn on traces | new behavior live; traces in the Cloudflare dashboard |
+| `main` | **Starter** | — | `npm run check`, `/api/ping` → `pong` |
+| `cp/1-hello-agent` | **Hello agent + first deploy** | `src/agents/field-trip.ts`, mount it in `src/app.ts`, add a Durable Object migration | agent replies locally **and** on your `workers.dev` URL |
+| `cp/2-hooks-state` | **Hooks + persistent state** | `usePersistentState('brief')` + a `save_trip_brief` tool | a second message remembers your headcount |
+| `cp/3-api-tools` | **Tools calling external APIs** | `geocode_city`, `get_forecast` (Open-Meteo) | a weather question shows tool calls in the conversation |
+| `cp/4-subagent` | **Sub-agent delegation** | Wikipedia tools; a `venue-scout` sub-agent with its own tool and model | the parent finds places, calls `task`, and combines the scout's assessment with the weather |
+| `cp/5-sandbox` | **Sandbox** | a Cloudflare Sandbox container per conversation | the agent writes `itinerary.md` and reads it back |
+| `cp/6-iterate-observe` | **Iterate + observe** | change behavior, redeploy, turn on traces | new behavior live; traces in the Cloudflare dashboard |
 
 ### Fell behind? Catch up in one command
 
 ```bash
 git stash push -u -m "my work" # keep tracked and untracked work
 git fetch origin
-git switch --no-track -C workshop origin/fix/flue-2.0.0-cp3
-git restore --source=origin/main -- scripts/check.mjs scripts/smoke.mjs .agents/skills/build-field-trip-agent
+git switch --no-track -C workshop origin/cp/3-api-tools
 npm ci                         # later checkpoints may add dependencies
 ```
 
@@ -207,7 +206,7 @@ scripts/                        # check.mjs, smoke.mjs (plain Node — works on 
 | Smoke POST times out | The submission may have been accepted; re-run smoke without a message before sending it again |
 | Container application belongs to another Durable Object namespace | Run `npx wrangler containers list`, delete only the `field-trip-agent-sandbox` application by ID, then deploy again |
 | Files the agent wrote are gone | The container was replaced after sleeping or deployment; persistent state is what survives |
-| Stuck? | Stash your work, then reset the reusable `workshop` branch to `origin/fix/flue-2.0.0-cpN` as shown above |
+| Stuck? | Stash your work, then reset the reusable `workshop` branch to the matching `origin/cp/*` branch as shown above |
 
 More gotchas live in the skill's
 [`references/troubleshooting.md`](.agents/skills/build-field-trip-agent/references/troubleshooting.md).
