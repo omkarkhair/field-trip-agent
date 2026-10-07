@@ -260,9 +260,8 @@ export function FieldTrip({ id }: AgentProps) {
   // The parent finds candidate places (Wikipedia geosearch)...
   useTool(findNearbyPlaces);
 
-  // ...and delegates assessing each one to a subagent. The model calls the
-  // built-in `task` tool once per place; each scout runs in a fresh context
-  // with its own tools, and only its final answer comes back here.
+  // ...and delegates assessing all three to one subagent call. The scout runs
+  // in a fresh context with its own tools, and only its final answer comes back.
   useSubagent(venueScout);
 
   // A Linux container per conversation (adds read/write/edit/bash/grep/glob tools),
