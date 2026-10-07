@@ -19,6 +19,8 @@
    the conversation history.
 4. **`useModel` is the one required hook,** called exactly once per render.
    `cloudflare/...` runs on Workers AI through the `AI` binding, so no API key is needed.
+   The workshop model, `gemma-4-26b-a4b-it`, runs on the free plan (paid alternatives
+   are listed in [flue-cheatsheet.md](../flue-cheatsheet.md#model-choice-tested-on-this-project)).
 5. **Adding an agent is a triple:**
    - the `'use agent'` file
    - the `app.route(...)` mount
@@ -34,6 +36,7 @@
  import { Hono } from 'hono';
 +import { createAgentRouter } from '@flue/runtime/routing';
 +import { FieldTrip } from './agents/field-trip.ts';
+ import chatUi from './ui/index.html?raw';
  ...
  app.get('/api/ping', (c) => c.text('pong'));
 +app.route('/agents/field-trip', createAgentRouter(FieldTrip));
@@ -59,7 +62,7 @@
 import { useModel } from '@flue/runtime';
 
 export function FieldTrip() {
-  useModel('cloudflare/@cf/moonshotai/kimi-k2.6');
+  useModel('cloudflare/@cf/google/gemma-4-26b-a4b-it');
   return `You are FieldTrip, a helpful team-offsite planner. You help groups plan memorable offsites by understanding their destination, dates, headcount, budget, and interests.`;
 }
 ```
@@ -70,12 +73,15 @@ export function FieldTrip() {
 import { Hono } from 'hono';
 import { createAgentRouter } from '@flue/runtime/routing';
 import { FieldTrip } from './agents/field-trip.ts';
+import chatUi from './ui/index.html?raw';
 
 // src/app.ts is the Flue route map. Its default export owns every HTTP request
 // the Worker receives. Agents get mounted here with createAgentRouter(...)
 // starting in checkpoint 1.
 const app = new Hono();
 
+// A small chat UI for trying the agent in a browser, locally and on workers.dev.
+app.get('/', (c) => c.html(chatUi));
 app.get('/api/ping', (c) => c.text('pong'));
 app.route('/agents/field-trip', createAgentRouter(FieldTrip));
 
@@ -140,24 +146,22 @@ portable.
    ```
    Pass: exit 0, same kind of reply from the live URL.
 
-### Sample passing output (reference build)
+### Sample passing output (reference build, live)
 
 ```
-POST http://localhost:5173/agents/field-trip/cp1-local
-202 accepted · submission sub_01M3NWX9… · waiting for the reply…
+POST https://field-trip-agent.<subdomain>.workers.dev/agents/field-trip/cp1-gemma
+202 accepted · submission sub_01M3S… · waiting for the reply…
 
-you › Hi, who are you?
+you › Hi, who are you? Two sentences.
 
 agent ›
-Hi! I'm **FieldTrip**, your team-offsite planning assistant. …
-- **Destination** … **Dates** … **Headcount** … **Budget** … **Interests** …
-**What kind of offsite are you thinking about?**
+I am FieldTrip, your dedicated assistant for planning memorable team offsites. I help
+you organize all the key details, including your destination, dates, budget, and team interests.
 
-✔ completed in 10.6s
+✔ completed in 9.7s
 ```
 
-Reference timings: about 5–11 s per reply locally and live. Deploy upload is
-about 807 KiB gzipped.
+Reference timings: about 4–10 s per reply (gemma-4-26b-a4b-it). Deploy upload is about 807 KiB gzipped.
 
 ## What to tell the attendee
 

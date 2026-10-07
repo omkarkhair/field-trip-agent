@@ -164,8 +164,8 @@ call (see troubleshooting).
 
 ## Bonus (optional): show the brief live in the chat UI
 
-An optional exercise for attendees with a coding agent who finish early (it is
-no longer advertised in the chat UI). The prompt:
+An optional exercise for attendees with a coding agent who finish early. The
+chat UI advertises the same prompt:
 
 > Implement the cp2 bonus: add a useDataWriter('brief') channel to the FieldTrip
 > agent and write the merged brief every time save_trip_brief runs.
