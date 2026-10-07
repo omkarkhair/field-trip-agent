@@ -26,7 +26,7 @@ model and tool call through production traces.
 | Sub-agent delegation | A `venue-scout` sub-agent with its own tool, its own model, and a fresh context |
 | Sandbox strategies | No sandbox → in-memory virtual sandbox → Cloudflare Computer → Cloudflare Sandbox container (built) |
 | Deploy, test, iterate | `vite dev` → `wrangler deploy` → test live → read traces |
-| Durable Objects | One Durable Object per conversation with persistent, isolated state |
+| Durable Objects | One agent Durable Object per conversation, plus a Sandbox container-manager Durable Object |
 
 ---
 
@@ -147,10 +147,9 @@ failures. Override these with `TIMEOUT_S`, `REQUEST_TIMEOUT_S`, and
 
 **In the browser:** open <http://localhost:5173> (or your `workers.dev` URL). The
 chat UI streams replies live, shows every tool call as an expandable chip, and
-has example prompts for each checkpoint (click one, then **Send**). The conversation
-id is in the URL (`/?id=…`): bookmark it, open several conversations in tabs, or
-open a smoke conversation with `/?id=offsite-1`. **New conversation** starts a fresh
-Durable Object.
+has example prompts for each checkpoint. **New conversation** starts a fresh
+Durable Object. The browser keeps its conversation id in local storage and shows
+it in the header; terminal smoke checks use the explicit id passed to the command.
 
 **From the terminal:**
 
