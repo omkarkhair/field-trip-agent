@@ -227,9 +227,8 @@ export function FieldTrip({ id }: AgentProps) {
   // The parent finds candidate places (Wikipedia geosearch)...
   useTool(findNearbyPlaces);
 
-  // ...and delegates assessing each one to a subagent. The model calls the
-  // built-in `task` tool once per place; each scout runs in a fresh context
-  // with its own tools, and only its final answer comes back here.
+  // ...and delegates assessing all three to one subagent call. The scout runs
+  // in a fresh context with its own tools, and only its final answer comes back.
   useSubagent(venueScout);
 
   // A Linux container per conversation (adds read/write/edit/bash/grep/glob tools).
@@ -281,14 +280,13 @@ Pass:
    (The UI's cp5 chip sends the same message; expand the `read` chip to see the file.)
 2. Message 4 shows the itinerary again: the file is still in the container.
 
-Then deploy (the first deploy pushes the image: ~1–2 min, longer on slow Wi-Fi)
-and repeat on the live URL with a fresh id. Optional isolation check:
+Optional isolation check with a fresh local conversation id:
 
 ```bash
-npm run smoke -- https://field-trip-agent.<subdomain>.workers.dev cp5-live-other "Use bash to run: ls -la /workspace. Then tell me whether a trip brief is saved."
+npm run smoke -- http://localhost:5173 cp5-local-other "Use bash to run: ls -la /workspace. Then tell me whether a trip brief is saved."
 ```
 
-Pass: the different conversation does not inherit `cp5-live`'s itinerary or
+Pass: the different conversation does not inherit `cp5-local`'s itinerary or
 trip brief. Container loss after sleep or replacement is real but not a
 deterministic workshop check.
 

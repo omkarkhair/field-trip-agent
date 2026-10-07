@@ -41,7 +41,7 @@ has no agent yet, just a verified Worker scaffold.
 | Line | Pass condition | Fix |
 |---|---|---|
 | `✔ Node x.y.z` | Node 22.19+ or 24.11+ | install a supported LTS release |
-| `✔ Dependencies installed (10 packages)` | every dep in `package.json` installed at the **exact** pinned version | `npm ci` |
+| `✔ Dependencies installed (N packages)` | every dep in `package.json` installed at the **exact** pinned version | `npm ci` |
 | `✔ Logged in to Cloudflare as …` | `wrangler whoami --json` reports `loggedIn: true` | `npx wrangler login` |
 | `! You have access to several Cloudflare accounts` | warning only | `export CLOUDFLARE_ACCOUNT_ID=<id>` or pick it when wrangler prompts |
 | `! Your token may be missing the Workers AI scope` | warning only | re-run `npx wrangler login` |
@@ -52,7 +52,7 @@ Exit code 0 means ready.
 
 | File | Purpose |
 |---|---|
-| `package.json` | pinned versions; scripts `dev`, `build`, `deploy`, `check`, `smoke`, `typecheck` |
+| `package.json` | pinned versions; scripts `dev`, `build`, `deploy`, `check`, `smoke`, `test`, `typecheck` |
 | `vite.config.ts` | `flue({ providers: ['cloudflare'] })` then `cloudflare({ config: flueWorkerConfig() })` |
 | `wrangler.jsonc` | name `field-trip-agent`, `nodejs_compat`, compat date ≥ 2026-04-01, `ai` binding (`remote: true`), **empty** `migrations: []` |
 | `src/app.ts` | Hono app: `GET /` → chat UI, `GET /api/ping` → `pong`; agents get mounted here from cp1 |
