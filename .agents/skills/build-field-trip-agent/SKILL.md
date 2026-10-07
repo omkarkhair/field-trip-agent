@@ -7,8 +7,8 @@ description: Use when building, fixing, verifying, deploying, or catching up on 
 
 You are helping a workshop attendee build **FieldTrip**, a team-offsite planner
 agent, with the [Flue Framework](https://flueframework.com) on Cloudflare Workers.
-The work is split into checkpoints `cp0`…`cp6`. Each checkpoint has a git tag and
-a branch containing verified working code.
+The work is split into checkpoints `cp0`…`cp6`. The starter is
+`fix/flue-2.0.0-main`; checkpoints 1–6 use tested `fix/flue-2.0.0-cpN` branches.
 
 Your job: **find where the attendee is, move them forward exactly one
 checkpoint, prove it works, and tell them what they learned.** The session is
@@ -32,9 +32,8 @@ Read them only when needed:
 
 ### 1. Detect the current checkpoint
 
-Run `git describe --tags --always` and `git status --short`. If the tag is
-exact and the tree is clean, that's the checkpoint. Otherwise, infer it from the
-files. The highest row that matches wins:
+Run `git branch --show-current` and `git status --short`, then infer the
+checkpoint from the files. The highest row that matches wins:
 
 | Evidence | At least |
 |---|---|
@@ -98,17 +97,19 @@ If the attendee is behind, or their code is broken and the clock is tight, **don
 hand-write several checkpoints.** Offer a clean jump instead:
 
 ```bash
-git stash push -u -m "my work"     # optional: keep their changes
-git fetch --all --tags
-git switch -c my-cpN cpN           # N = the checkpoint the room is on
+git stash push -u -m "my work"     # required when the tree is dirty
+git fetch origin
+git switch --no-track -C workshop origin/fix/flue-2.0.0-cpN
+git restore --source=origin/main -- scripts/check.mjs scripts/smoke.mjs .agents/skills/build-field-trip-agent
 npm ci                             # later checkpoints may add dependencies
 ```
 
-Then run that checkpoint's verify command to confirm the jump worked. Branches
-`cp/1-hello-agent` … `cp/6-iterate-observe` hold the same code as the tags.
+Then run that checkpoint's verify command to confirm the jump worked. Replace
+`N` with the checkpoint number (`1`…`6`). The reusable branch makes repeated
+recovery safe after the attendee's work has been stashed.
 
 If they want to keep their own edits, compare them with
-`git diff cpN -- src/ wrangler.jsonc` and help them close the gap.
+`git diff origin/fix/flue-2.0.0-cpN -- src/ wrangler.jsonc` and help them close the gap.
 
 ## Non-negotiable rules
 

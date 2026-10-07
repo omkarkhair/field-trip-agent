@@ -204,8 +204,10 @@ migration, and `containers: [{ class_name, image: "./Dockerfile", max_instances 
 - Adds built-in tools `read`, `write`, `edit`, `bash`, `grep`, `glob` (cwd `/workspace`).
 - At most once per render; the factory is lazy (built once per initialization).
   Initialization touches the sandbox (workspace discovery), so **every
-  conversation starts a container**, even if it never uses a file tool.
-- Container files survive while it's awake; a sleep or redeploy wipes them.
+  conversation starts a container**, even if it never uses a file tool. cp6 fixes that
+  by gating it: `if (workspace) useSandbox(...)`, with a tool that sets the persistent
+  `workspace` flag. Flue swaps the environment at the next turn boundary (`environment` signal).
+- Container files survive while the instance is awake and are lost when it stops or restarts.
   Durable facts go in `usePersistentState`.
 - `@cloudflare/sandbox` 1.x changed `exec()` to return a process handle; Flue
   2.0.0's `cloudflareSandbox()` expects the 0.x API, so stay on 0.12.x.
@@ -215,7 +217,7 @@ migration, and `containers: [{ class_name, image: "./Dockerfile", max_instances 
 | none | — | — | any | prompt/tool-only agents |
 | virtual `just-bash`: `useSandbox(bash(() => new Bash({ fs: new InMemoryFs() })))` | ms | in-memory, ephemeral | any | scratch files, curl/jq, text reshaping |
 | Cloudflare Computer (`npx flue add sandbox cloudflare-computer`) | ms | SQLite in the agent DO, durable | Paid (Dynamic Workers) | durable workspace, shell-only work |
-| **Cloudflare Sandbox** (`@cloudflare/sandbox`) | seconds | container disk, until sleep/redeploy | Paid (Containers) | full Linux, real toolchains |
+| **Cloudflare Sandbox** (`@cloudflare/sandbox`) | seconds | non-durable container disk | Paid (Containers) | full Linux, real toolchains |
 
 ## Durable tools
 
