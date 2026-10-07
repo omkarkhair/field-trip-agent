@@ -1,0 +1,29 @@
+.agents/skills/build-field-trip-agent/SKILL.md
+  s_2c7aaccb31ed20::t_8400e0041fa035 137,143-145
+.agents/skills/build-field-trip-agent/references/checkpoints/cp6-iterate-observe.md
+  s_2c7aaccb31ed20::t_21ff6fd3d483af 326-328
+.agents/skills/build-field-trip-agent/references/deploy.md
+  s_2c7aaccb31ed20::t_8205fcad4c35c2 97-99
+.agents/skills/build-field-trip-agent/references/flue-cheatsheet.md
+  s_2c7aaccb31ed20::t_9d5d58f01730d3 1,213,300
+.agents/skills/build-field-trip-agent/references/prework.md
+  s_2c7aaccb31ed20::t_9a6d6f8e6cff54 68,71-75
+.agents/skills/build-field-trip-agent/references/troubleshooting.md
+  s_2c7aaccb31ed20::t_15da877f6718d4 10,38-42,238,278-284
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "7cc97fb6ab50ead556b93623643fff60e4b6e36f",
+  "prompts": {},
+  "sessions": {
+    "s_2c7aaccb31ed20": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f1771f962ffeSZr6YWAEUB7WRX",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Omkar Khair <omkar@cloudflare.com>"
+    }
+  }
+}
