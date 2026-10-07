@@ -94,7 +94,9 @@ Not needed for this workshop (Workers AI is keyless). If you switch providers:
   attributed to the response that wrote them.
 - **Traces:** one trace per agent response (the DO alarm invocation that ran it),
   with Flue spans `invoke_agent` → `chat` (per model turn, with token usage) →
-  `execute_tool` (per tool call). Spans include conversation content by default.
+  `execute_tool` (per tool call); a subagent appears as a nested `invoke_agent venue-scout`.
+  Spans include conversation content by default. This full tree needs Flue **2.0.0**
+  (the pinned version); 2.1.x stops after the first `chat` span.
 - Live tail from the terminal: `npx wrangler tail field-trip-agent` (shows request/RPC/alarm
   invocations; a response's own `console.log` lines appear in the dashboard, not in tail).
 - Tool logs for Workers Logs: `console.log({ event: '…', … })`. Flue's `log.info` goes to

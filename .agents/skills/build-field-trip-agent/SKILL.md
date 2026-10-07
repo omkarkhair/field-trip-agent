@@ -134,10 +134,12 @@ If they want to keep their own edits, compare them with
 7. `flue run` can't run this project (Workers AI needs `vite dev` or a deploy).
    Always verify through `npm run dev` + `npm run smoke`.
 8. When flueframework.com and the installed package disagree, trust
-   `npx flue docs read <page>`, which ships with the installed version (2.1.1).
+   `npx flue docs read <page>`, which ships with the installed version (2.0.0).
 9. Never create or commit `.dev.vars`/`.env` secrets. Workers AI needs no API keys.
 10. **Keep diffs minimal.** Some attendees paste code by hand: make the smallest
     change that passes verify, and show the checkpoint's *Diff* section rather
     than whole files when explaining.
 11. cp5 needs Docker running and an account with Containers. Pin
-    `@cloudflare/sandbox@0.12.10` (1.x breaks Flue 2.1.1) with a matching `Dockerfile` tag.
+    `@cloudflare/sandbox@0.12.10` (1.x breaks Flue's `cloudflareSandbox()`) with a matching `Dockerfile` tag.
+12. **Flue is pinned to 2.0.0** (plus `agents` 0.20.1). Don't upgrade to 2.1.x:
+    its Cloudflare traces lose the `chat`/`execute_tool` span tree.
